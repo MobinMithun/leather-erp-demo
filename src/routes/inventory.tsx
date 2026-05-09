@@ -141,7 +141,7 @@ function InventoryPage() {
               </tr>
             </thead>
             <tbody>
-              {STOCK_MOVES.map((m) => {
+              {moves.map((m) => {
                 const tone =
                   m.type === "IN" ? "text-status-ok"
                     : m.type === "OUT" ? "text-status-bad"
