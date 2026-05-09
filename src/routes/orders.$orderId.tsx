@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { PageShell, StatCard, StatusPill } from "@/components/page-shell";
 import { fmtBDT, fmtNum, type Batch, type OrderStatus } from "@/lib/mock-data";
 import { useStore, ORDER_NEXT_STATUS } from "@/lib/store";
@@ -8,7 +8,6 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/orders/$orderId")({
   head: ({ params }) => ({ meta: [{ title: `${params.orderId} — HIDE.OS` }] }),
-  loader: ({ params }) => ({ orderId: params.orderId }),
   component: OrderDetailPage,
 });
 
@@ -29,7 +28,7 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
 };
 
 function OrderDetailPage() {
-  const { orderId } = Route.useLoaderData();
+  const { orderId } = useParams({ from: "/orders/$orderId" });
   const { orders, batches, updateOrderStatus } = useStore();
 
   const order = orders.find((o) => o.order_no === orderId);

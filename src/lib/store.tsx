@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import {
   ORDERS as SEED_ORDERS,
   BATCHES as SEED_BATCHES,
@@ -179,7 +179,13 @@ interface StoreCtx extends DB {
 const StoreContext = createContext<StoreCtx | null>(null);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [db, setDB] = useState<DB>(() => loadDB());
+  // Always start with seed data so server and client first-render agree (no hydration mismatch).
+  // After mount, overwrite with whatever is in localStorage.
+  const [db, setDB] = useState<DB>(seedDB);
+
+  useEffect(() => {
+    setDB(loadDB());
+  }, []);
 
   const update = (fn: (prev: DB) => DB) => {
     setDB((prev) => {
