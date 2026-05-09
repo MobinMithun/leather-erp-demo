@@ -235,6 +235,32 @@ export const STAGE_THROUGHPUT = [
   { stage: "QC", pieces: 740 },
 ];
 
+export type StockMoveType = "IN" | "OUT" | "TRANSFER" | "ADJUST";
+export interface StockMove {
+  id: string;
+  ts: string;
+  type: StockMoveType;
+  item: string;
+  item_kind: "raw_skin" | "chemical" | "wet_blue" | "crust" | "finished";
+  lot_no: string;
+  qty: number;
+  unit: "pcs" | "kg" | "sqft";
+  from: string;
+  to: string;
+  ref: string;
+  user: string;
+}
+export const STOCK_MOVES: StockMove[] = [
+  { id: "m1", ts: "2026-05-08 06:42", type: "IN", item: "Cow raw skin", item_kind: "raw_skin", lot_no: "RAW-2605-001", qty: 720, unit: "pcs", from: "Sirajganj supplier", to: "Raw store · A1", ref: "GRN-2605-014", user: "rahim.k" },
+  { id: "m2", ts: "2026-05-08 07:15", type: "OUT", item: "Chrome Sulphate 33%", item_kind: "chemical", lot_no: "CS-2604-A", qty: 180, unit: "kg", from: "Chem store", to: "Drum D-04", ref: "B-26041", user: "shift.A" },
+  { id: "m3", ts: "2026-05-08 09:02", type: "TRANSFER", item: "Wet-blue cow", item_kind: "wet_blue", lot_no: "B-26045", qty: 800, unit: "pcs", from: "Sammy floor", to: "Wet-blue store", ref: "B-26045", user: "kabir.m" },
+  { id: "m4", ts: "2026-05-08 10:48", type: "OUT", item: "Anionic Fatliquor", item_kind: "chemical", lot_no: "FL-2604-D", qty: 64, unit: "kg", from: "Chem store", to: "Drum D-07", ref: "B-26043", user: "shift.A" },
+  { id: "m5", ts: "2026-05-08 11:30", type: "IN", item: "Crust leather", item_kind: "crust", lot_no: "B-26041", qty: 410, unit: "pcs", from: "Dye line", to: "Crust store · C2", ref: "B-26041", user: "shamim.r" },
+  { id: "m6", ts: "2026-05-08 13:05", type: "ADJUST", item: "Sodium Sulphide", item_kind: "chemical", lot_no: "SS-2603-B", qty: -12, unit: "kg", from: "Chem store", to: "Chem store", ref: "ADJ-052", user: "store.lead" },
+  { id: "m7", ts: "2026-05-08 14:22", type: "OUT", item: "Finished leather", item_kind: "finished", lot_no: "B-26039", qty: 950, unit: "pcs", from: "Finished store", to: "Dispatch · Istanbul Deri", ref: "SO-2025-0140", user: "warehouse" },
+  { id: "m8", ts: "2026-05-08 15:40", type: "IN", item: "Goat raw skin", item_kind: "raw_skin", lot_no: "RAW-2604-003", qty: 2400, unit: "pcs", from: "Rajshahi supplier", to: "Raw store · A2", ref: "GRN-2604-031", user: "rahim.k" },
+];
+
 export const fmtBDT = (n: number) =>
   "৳" + new Intl.NumberFormat("en-BD", { maximumFractionDigits: 0 }).format(n);
 export const fmtNum = (n: number) => new Intl.NumberFormat("en-US").format(n);
