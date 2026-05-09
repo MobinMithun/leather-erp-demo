@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, StatusPill } from "@/components/page-shell";
 import { BATCHES, STAGES, fmtNum } from "@/lib/mock-data";
-import { Plus } from "lucide-react";
+import { BatchCreateDialog } from "@/components/batch-create-dialog";
 
 export const Route = createFileRoute("/batches")({
   head: () => ({ meta: [{ title: "Batches — HIDE.OS" }] }),
@@ -13,11 +13,7 @@ function BatchesPage() {
     <PageShell
       title="Production Batches"
       subtitle="Batch-level tracking through wet ops; piece-level after shaving"
-      actions={
-        <button className="inline-flex items-center gap-1.5 bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90">
-          <Plus className="h-3.5 w-3.5" /> New batch
-        </button>
-      }
+      actions={<BatchCreateDialog />}
     >
       <div className="border border-border bg-card overflow-x-auto">
         <table className="w-full text-sm tabular">
