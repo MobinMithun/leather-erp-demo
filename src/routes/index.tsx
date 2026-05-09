@@ -1,4 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { PageShell, StatCard, StatusPill } from "@/components/page-shell";
 import {
   KPI, ORDERS, BATCHES, ESG, STAGE_THROUGHPUT, INVENTORY_POOLS, fmtBDT, fmtNum,
@@ -8,25 +10,92 @@ import {
   BarChart, Bar,
 } from "recharts";
 
+const searchSchema = z.object({
+  range: fallback(z.enum(["7d", "10d", "30d"]), "10d").default("10d"),
+  species: fallback(z.enum(["all", "cow", "goat"]), "all").default("all"),
+  exit: fallback(z.enum(["all", "wet_blue", "crust", "finished"]), "all").default("all"),
+});
+
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [{ title: "Dashboard — HIDE.OS" }] }),
+  validateSearch: zodValidator(searchSchema),
   component: Dashboard,
 });
 
+const RANGES: { value: "7d" | "10d" | "30d"; label: string; days: number }[] = [
+  { value: "7d", label: "7 days", days: 7 },
+  { value: "10d", label: "10 days", days: 10 },
+  { value: "30d", label: "30 days", days: 30 },
+];
+const SPECIES: { value: "all" | "cow" | "goat"; label: string }[] = [
+  { value: "all", label: "All species" },
+  { value: "cow", label: "Cow" },
+  { value: "goat", label: "Goat" },
+];
+const EXITS: { value: "all" | "wet_blue" | "crust" | "finished"; label: string }[] = [
+  { value: "all", label: "All exits" },
+  { value: "wet_blue", label: "Wet-blue" },
+  { value: "crust", label: "Crust" },
+  { value: "finished", label: "Finished" },
+];
+
+function FilterPills<T extends string>({
+  options, value, onChange,
+}: { options: { value: T; label: string }[]; value: T; onChange: (v: T) => void }) {
+  return (
+    <div className="inline-flex border border-border bg-card">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          onClick={() => onChange(o.value)}
+          className={`px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider border-r border-border last:border-r-0 ${
+            value === o.value ? "bg-accent/15 text-accent-foreground" : "text-muted-foreground hover:bg-muted"
+          }`}
+        >{o.label}</button>
+      ))}
+    </div>
+  );
+}
+
 function Dashboard() {
-  const recentBatches = BATCHES.slice(0, 6);
-  const urgentOrders = ORDERS
+  const { range, species, exit } = Route.useSearch();
+  const navigate = useNavigate({ from: "/" });
+
+  const days = RANGES.find((r) => r.value === range)?.days ?? 10;
+  const esgData = ESG.slice(-days);
+
+  const filteredBatches = BATCHES.filter((b) =>
+    (species === "all" || b.species === species) &&
+    (exit === "all" || b.exit === exit)
+  );
+  const recentBatches = filteredBatches.slice(0, 6);
+
+  const filteredOrders = ORDERS.filter((o) => {
+    if (species === "all") return true;
+    return species === "cow" ? o.article.startsWith("COW") : o.article.startsWith("GOAT");
+  });
+  const urgentOrders = filteredOrders
     .filter((o) => o.status === "in_production" || o.status === "confirmed")
     .slice(0, 4);
+
+  const set = (patch: Partial<{ range: typeof range; species: typeof species; exit: typeof exit }>) =>
+    navigate({ search: (prev) => ({ ...prev, ...patch }) });
 
   return (
     <PageShell
       title="Dashboard"
       subtitle="Make-to-order production · cow + goat · wet-blue, crust & finished"
+      actions={
+        <>
+          <FilterPills options={RANGES} value={range} onChange={(v) => set({ range: v })} />
+          <FilterPills options={SPECIES} value={species} onChange={(v) => set({ species: v })} />
+          <FilterPills options={EXITS} value={exit} onChange={(v) => set({ exit: v })} />
+        </>
+      }
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard label="Active orders" value={KPI.active_orders} sub="open + in production" />
-        <StatCard label="Active batches" value={KPI.active_batches} sub="across 8 drums" />
+        <StatCard label="Active batches" value={filteredBatches.length} sub={species === "all" ? "all species" : `${species} only`} />
         <StatCard label="Pieces in WIP" value={fmtNum(KPI.pieces_in_wip)} tone="info" />
         <StatCard label="On-time delivery" value={`${KPI.on_time_pct}%`} tone="ok" sub="trailing 30 days" />
         <StatCard label="Finished sq ft" value={fmtNum(KPI.finished_sqft)} sub="ready for dispatch" />
@@ -39,7 +108,7 @@ function Dashboard() {
         <div className="border border-border bg-card p-4 lg:col-span-2">
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">ESG · 10-day trend</div>
+              <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">ESG · {days}-day trend</div>
               <div className="text-sm font-medium">Water (m³) vs Chrome (kg)</div>
             </div>
             <div className="flex items-center gap-3 text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -49,7 +118,7 @@ function Dashboard() {
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={ESG} margin={{ left: -20, right: 8, top: 4, bottom: 0 }}>
+              <AreaChart data={esgData} margin={{ left: -20, right: 8, top: 4, bottom: 0 }}>
                 <defs>
                   <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="oklch(0.55 0.15 250)" stopOpacity={0.4} />
@@ -101,7 +170,7 @@ function Dashboard() {
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div>
               <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Production</div>
-              <div className="text-sm font-medium">Active batches</div>
+              <div className="text-sm font-medium">Active batches{species !== "all" ? ` · ${species}` : ""}{exit !== "all" ? ` · ${exit.replace("_", "-")}` : ""}</div>
             </div>
             <Link to="/batches" className="text-xs text-accent-foreground underline-offset-2 hover:underline">View all →</Link>
           </div>
@@ -116,7 +185,9 @@ function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {recentBatches.map((b) => (
+              {recentBatches.length === 0 ? (
+                <tr><td colSpan={5} className="px-4 py-8 text-center text-xs text-muted-foreground">No batches match filters</td></tr>
+              ) : recentBatches.map((b) => (
                 <tr key={b.id} className="border-t border-border hover:bg-muted/30">
                   <td className="px-4 py-2 font-mono text-xs">{b.batch_no}</td>
                   <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{b.article}</td>
@@ -148,9 +219,13 @@ function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {urgentOrders.map((o) => (
+              {urgentOrders.length === 0 ? (
+                <tr><td colSpan={5} className="px-4 py-8 text-center text-xs text-muted-foreground">No orders match filters</td></tr>
+              ) : urgentOrders.map((o) => (
                 <tr key={o.id} className="border-t border-border hover:bg-muted/30">
-                  <td className="px-4 py-2 font-mono text-xs">{o.order_no}</td>
+                  <td className="px-4 py-2 font-mono text-xs">
+                    <Link to="/orders/$orderId" params={{ orderId: o.order_no }} className="text-accent-foreground underline-offset-2 hover:underline">{o.order_no}</Link>
+                  </td>
                   <td className="px-4 py-2 text-xs">{o.customer}</td>
                   <td className="px-4 py-2 text-right">{fmtNum(o.qty_pcs)}</td>
                   <td className="px-4 py-2 text-xs">{o.due_date}</td>
