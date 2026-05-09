@@ -2,12 +2,10 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { PageShell, StatCard, StatusPill } from "@/components/page-shell";
+import { INVENTORY_POOLS, fmtBDT, fmtNum, STAGE_THROUGHPUT } from "@/lib/mock-data";
+import { useStore } from "@/lib/store";
 import {
-  KPI, ORDERS, BATCHES, ESG, STAGE_THROUGHPUT, INVENTORY_POOLS, fmtBDT, fmtNum,
-} from "@/lib/mock-data";
-import {
-  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
-  BarChart, Bar,
+  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar,
 } from "recharts";
 
 const searchSchema = z.object({
@@ -51,7 +49,9 @@ function FilterPills<T extends string>({
           className={`px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider border-r border-border last:border-r-0 ${
             value === o.value ? "bg-accent/15 text-accent-foreground" : "text-muted-foreground hover:bg-muted"
           }`}
-        >{o.label}</button>
+        >
+          {o.label}
+        </button>
       ))}
     </div>
   );
@@ -60,17 +60,18 @@ function FilterPills<T extends string>({
 function Dashboard() {
   const { range, species, exit } = Route.useSearch();
   const navigate = useNavigate({ from: "/" });
+  const { orders, batches, esgEntries, qcEntries } = useStore();
 
   const days = RANGES.find((r) => r.value === range)?.days ?? 10;
-  const esgData = ESG.slice(-days);
+  const esgData = esgEntries.slice(-days);
 
-  const filteredBatches = BATCHES.filter((b) =>
+  const filteredBatches = batches.filter((b) =>
     (species === "all" || b.species === species) &&
     (exit === "all" || b.exit === exit)
   );
   const recentBatches = filteredBatches.slice(0, 6);
 
-  const filteredOrders = ORDERS.filter((o) => {
+  const filteredOrders = orders.filter((o) => {
     if (species === "all") return true;
     return species === "cow" ? o.article.startsWith("COW") : o.article.startsWith("GOAT");
   });
@@ -80,6 +81,15 @@ function Dashboard() {
 
   const set = (patch: Partial<{ range: typeof range; species: typeof species; exit: typeof exit }>) =>
     navigate({ search: (prev: { range: typeof range; species: typeof species; exit: typeof exit }) => ({ ...prev, ...patch }) });
+
+  // Live KPIs
+  const activeOrders = orders.filter((o) => o.status === "in_production" || o.status === "confirmed").length;
+  const activeBatches = filteredBatches.filter((b) => b.status !== "done").length;
+  const piecesInWip = batches.filter((b) => b.status !== "done").reduce((s, b) => s + b.pieces, 0);
+  const lastESG = esgEntries.length > 0 ? esgEntries[esgEntries.length - 1] : null;
+  const avgQCYield = qcEntries.length > 0
+    ? (qcEntries.slice(-4).reduce((s, q) => s + q.yield_pct, 0) / Math.min(4, qcEntries.length))
+    : 97.5;
 
   return (
     <PageShell
@@ -94,14 +104,14 @@ function Dashboard() {
       }
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatCard label="Active orders" value={KPI.active_orders} sub="open + in production" />
-        <StatCard label="Active batches" value={filteredBatches.length} sub={species === "all" ? "all species" : `${species} only`} />
-        <StatCard label="Pieces in WIP" value={fmtNum(KPI.pieces_in_wip)} tone="info" />
-        <StatCard label="On-time delivery" value={`${KPI.on_time_pct}%`} tone="ok" sub="trailing 30 days" />
-        <StatCard label="Finished sq ft" value={fmtNum(KPI.finished_sqft)} sub="ready for dispatch" />
-        <StatCard label="QC yield" value={`${KPI.qc_yield_pct}%`} tone="ok" />
-        <StatCard label="Water today" value={`${KPI.water_today} m³`} tone="info" />
-        <StatCard label="Chrome today" value={`${KPI.chrome_today} kg`} tone="warn" />
+        <StatCard label="Active orders" value={activeOrders} sub="open + in production" />
+        <StatCard label="Active batches" value={activeBatches} sub={species === "all" ? "all species" : `${species} only`} />
+        <StatCard label="Pieces in WIP" value={fmtNum(piecesInWip)} tone="info" />
+        <StatCard label="On-time delivery" value="92.4%" tone="ok" sub="trailing 30 days" />
+        <StatCard label="Finished sq ft" value={fmtNum(INVENTORY_POOLS[2].sqft)} sub="ready for dispatch" />
+        <StatCard label="QC yield" value={`${avgQCYield.toFixed(1)}%`} tone="ok" />
+        <StatCard label="Water today" value={lastESG ? `${lastESG.water_m3} m³` : "—"} tone="info" />
+        <StatCard label="Chrome today" value={lastESG ? `${lastESG.chrome_kg} kg` : "—"} tone="warn" />
       </div>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
@@ -117,29 +127,35 @@ function Dashboard() {
             </div>
           </div>
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={esgData} margin={{ left: -20, right: 8, top: 4, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.55 0.15 250)" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="oklch(0.55 0.15 250)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.72 0.16 55)" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="oklch(0.72 0.16 55)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid stroke="oklch(0.88 0.006 250)" strokeDasharray="2 4" vertical={false} />
-                <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "oklch(0.48 0.012 250)" }} />
-                <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "oklch(0.48 0.012 250)" }} />
-                <Tooltip
-                  contentStyle={{ background: "oklch(0.20 0.01 250)", border: "none", borderRadius: 4, fontSize: 12, color: "white" }}
-                  labelStyle={{ color: "oklch(0.88 0.004 250)" }}
-                />
-                <Area type="monotone" dataKey="water_m3" stroke="oklch(0.55 0.15 250)" fill="url(#g1)" strokeWidth={2} />
-                <Area type="monotone" dataKey="chrome_kg" stroke="oklch(0.72 0.16 55)" fill="url(#g2)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
+            {esgData.length > 1 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={esgData} margin={{ left: -20, right: 8, top: 4, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="oklch(0.55 0.15 250)" stopOpacity={0.4} />
+                      <stop offset="100%" stopColor="oklch(0.55 0.15 250)" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="oklch(0.72 0.16 55)" stopOpacity={0.4} />
+                      <stop offset="100%" stopColor="oklch(0.72 0.16 55)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke="oklch(0.88 0.006 250)" strokeDasharray="2 4" vertical={false} />
+                  <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "oklch(0.48 0.012 250)" }} />
+                  <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "oklch(0.48 0.012 250)" }} />
+                  <Tooltip
+                    contentStyle={{ background: "oklch(0.20 0.01 250)", border: "none", borderRadius: 4, fontSize: 12, color: "white" }}
+                    labelStyle={{ color: "oklch(0.88 0.004 250)" }}
+                  />
+                  <Area type="monotone" dataKey="water_m3" stroke="oklch(0.55 0.15 250)" fill="url(#g1)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="chrome_kg" stroke="oklch(0.72 0.16 55)" fill="url(#g2)" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+                Log ESG data to see the trend chart.
+              </div>
+            )}
           </div>
         </div>
 
@@ -170,7 +186,9 @@ function Dashboard() {
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div>
               <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Production</div>
-              <div className="text-sm font-medium">Active batches{species !== "all" ? ` · ${species}` : ""}{exit !== "all" ? ` · ${exit.replace("_", "-")}` : ""}</div>
+              <div className="text-sm font-medium">
+                Active batches{species !== "all" ? ` · ${species}` : ""}{exit !== "all" ? ` · ${exit.replace("_", "-")}` : ""}
+              </div>
             </div>
             <Link to="/batches" className="text-xs text-accent-foreground underline-offset-2 hover:underline">View all →</Link>
           </div>
@@ -224,7 +242,9 @@ function Dashboard() {
               ) : urgentOrders.map((o) => (
                 <tr key={o.id} className="border-t border-border hover:bg-muted/30">
                   <td className="px-4 py-2 font-mono text-xs">
-                    <Link to="/orders/$orderId" params={{ orderId: o.order_no }} className="text-accent-foreground underline-offset-2 hover:underline">{o.order_no}</Link>
+                    <Link to="/orders/$orderId" params={{ orderId: o.order_no }} className="text-accent-foreground underline-offset-2 hover:underline">
+                      {o.order_no}
+                    </Link>
                   </td>
                   <td className="px-4 py-2 text-xs">{o.customer}</td>
                   <td className="px-4 py-2 text-right">{fmtNum(o.qty_pcs)}</td>

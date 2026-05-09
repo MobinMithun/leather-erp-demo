@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, StatusPill } from "@/components/page-shell";
-import { BATCHES, STAGES, fmtNum } from "@/lib/mock-data";
+import { STAGES, fmtNum } from "@/lib/mock-data";
+import { useStore } from "@/lib/store";
 import { BatchCreateDialog } from "@/components/batch-create-dialog";
+import { toast } from "sonner";
+import { Play } from "lucide-react";
 
 export const Route = createFileRoute("/batches")({
   head: () => ({ meta: [{ title: "Batches — HIDE.OS" }] }),
@@ -9,6 +12,17 @@ export const Route = createFileRoute("/batches")({
 });
 
 function BatchesPage() {
+  const { batches, advanceBatchStage } = useStore();
+
+  const advance = (id: string, batchNo: string) => {
+    const newStage = advanceBatchStage(id);
+    if (newStage) {
+      toast.success(`${batchNo} → ${newStage.replace("_", " ").toUpperCase()}`, {
+        description: "Stage advanced",
+      });
+    }
+  };
+
   return (
     <PageShell
       title="Production Batches"
@@ -29,11 +43,12 @@ function BatchesPage() {
               <th className="px-4 py-2.5 text-left font-medium">Recipe</th>
               <th className="px-4 py-2.5 text-left font-medium">Exit</th>
               <th className="px-4 py-2.5 text-left font-medium">Stage</th>
-              <th className="px-4 py-2.5 w-64 text-left font-medium">Progress</th>
+              <th className="px-4 py-2.5 w-48 text-left font-medium">Progress</th>
+              <th className="px-4 py-2.5 text-left font-medium">Action</th>
             </tr>
           </thead>
           <tbody>
-            {BATCHES.map((b) => {
+            {batches.map((b) => {
               const stageIdx = STAGES.findIndex((s) => s.code === b.current_stage);
               const total = b.exit === "wet_blue" ? 7 : b.exit === "crust" ? 11 : 15;
               const pct = Math.min(100, Math.round(((stageIdx + 1) / total) * 100));
@@ -57,6 +72,16 @@ function BatchesPage() {
                       <span className="text-[10px] text-muted-foreground tabular w-8 text-right">{pct}%</span>
                     </div>
                   </td>
+                  <td className="px-4 py-2.5">
+                    <button
+                      disabled={b.status === "done"}
+                      onClick={() => advance(b.id, b.batch_no)}
+                      className="inline-flex items-center gap-1 border border-border bg-background px-2 py-1 text-[10px] font-medium uppercase tracking-wider hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <Play className="h-2.5 w-2.5" />
+                      {b.status === "queued" ? "Start" : b.status === "done" ? "Done" : "Advance"}
+                    </button>
+                  </td>
                 </tr>
               );
             })}
@@ -73,7 +98,9 @@ function BatchesPage() {
             <div
               key={s.code}
               className={`flex items-center gap-1.5 border px-2 py-1 text-[10px] uppercase tracking-wider ${
-                s.piece ? "border-accent/40 bg-accent/5 text-accent-foreground" : "border-border bg-muted text-muted-foreground"
+                s.piece
+                  ? "border-accent/40 bg-accent/5 text-accent-foreground"
+                  : "border-border bg-muted text-muted-foreground"
               }`}
             >
               <span className="font-mono">{String(i + 1).padStart(2, "0")}</span>
@@ -82,8 +109,12 @@ function BatchesPage() {
           ))}
         </div>
         <div className="mt-3 flex gap-4 text-[10px] uppercase tracking-wider text-muted-foreground">
-          <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 bg-muted border border-border" />Batch-level</span>
-          <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 bg-accent/30 border border-accent/40" />Piece-level</span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 bg-muted border border-border" />Batch-level
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 bg-accent/30 border border-accent/40" />Piece-level
+          </span>
         </div>
       </div>
     </PageShell>

@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogDescription,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ORDERS, RECIPES, type ExitPoint } from "@/lib/mock-data";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { useStore } from "@/lib/store";
+import { type ExitPoint } from "@/lib/mock-data";
 import { toast } from "sonner";
 
 const DRUMS = ["D-01", "D-02", "D-03", "D-04", "D-05", "D-06", "D-07", "D-08"];
@@ -15,6 +20,7 @@ const EXITS: { value: ExitPoint; label: string }[] = [
 ];
 
 export function BatchCreateDialog() {
+  const { orders, recipes, addBatch } = useStore();
   const [open, setOpen] = useState(false);
   const [orderNo, setOrderNo] = useState("");
   const [recipe, setRecipe] = useState("");
@@ -33,8 +39,25 @@ export function BatchCreateDialog() {
       toast.error("All fields are required");
       return;
     }
-    const batchNo = "B-" + Math.floor(26100 + Math.random() * 800);
-    toast.success(`Batch ${batchNo} queued`, {
+
+    const order = orders.find((o) => o.order_no === orderNo);
+    if (!order) {
+      toast.error("Order not found");
+      return;
+    }
+
+    const batch = addBatch({
+      order_no: orderNo,
+      article: order.article,
+      species: order.article.startsWith("GOAT") ? "goat" : "cow",
+      raw_kg: Number(rawKg),
+      pieces: Number(pieces),
+      drum,
+      recipe,
+      exit,
+    });
+
+    toast.success(`Batch ${batch.batch_no} queued`, {
       description: `${orderNo} · ${pieces} pcs · ${drum} · ${recipe}`,
     });
     reset();
@@ -62,7 +85,7 @@ export function BatchCreateDialog() {
             <Select value={orderNo} onValueChange={setOrderNo}>
               <SelectTrigger><SelectValue placeholder="Select an order" /></SelectTrigger>
               <SelectContent>
-                {ORDERS.filter(o => o.status !== "dispatched").map(o => (
+                {orders.filter((o) => o.status !== "dispatched").map((o) => (
                   <SelectItem key={o.id} value={o.order_no}>
                     <span className="font-mono text-xs">{o.order_no}</span> · {o.customer} · {o.article}
                   </SelectItem>
@@ -76,7 +99,7 @@ export function BatchCreateDialog() {
             <Select value={recipe} onValueChange={setRecipe}>
               <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
               <SelectContent>
-                {RECIPES.filter(r => r.active).map(r => (
+                {recipes.filter((r) => r.active).map((r) => (
                   <SelectItem key={r.id} value={r.code}>{r.code}</SelectItem>
                 ))}
               </SelectContent>
@@ -88,7 +111,7 @@ export function BatchCreateDialog() {
             <Select value={drum} onValueChange={setDrum}>
               <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
               <SelectContent>
-                {DRUMS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                {DRUMS.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -106,13 +129,19 @@ export function BatchCreateDialog() {
           <div className="col-span-2 space-y-1.5">
             <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Exit point</Label>
             <div className="flex gap-2">
-              {EXITS.map(e => (
+              {EXITS.map((ex) => (
                 <button
                   type="button"
-                  key={e.value}
-                  onClick={() => setExit(e.value)}
-                  className={`flex-1 border px-3 py-1.5 text-xs uppercase tracking-wider ${exit === e.value ? "border-accent bg-accent/10 text-accent-foreground" : "border-border bg-background text-muted-foreground hover:bg-muted"}`}
-                >{e.label}</button>
+                  key={ex.value}
+                  onClick={() => setExit(ex.value)}
+                  className={`flex-1 border px-3 py-1.5 text-xs uppercase tracking-wider ${
+                    exit === ex.value
+                      ? "border-accent bg-accent/10 text-accent-foreground"
+                      : "border-border bg-background text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {ex.label}
+                </button>
               ))}
             </div>
           </div>

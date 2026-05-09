@@ -3,48 +3,24 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import type { StockMove, StockMoveType } from "@/lib/mock-data";
+import { useStore, type NewStockMove } from "@/lib/store";
+import type { StockMove } from "@/lib/mock-data";
 
-const TYPES: StockMoveType[] = ["IN", "OUT", "TRANSFER", "ADJUST"];
-const KINDS: StockMove["item_kind"][] = [
-  "raw_skin",
-  "chemical",
-  "wet_blue",
-  "crust",
-  "finished",
-];
+const TYPES: StockMove["type"][] = ["IN", "OUT", "TRANSFER", "ADJUST"];
+const KINDS: StockMove["item_kind"][] = ["raw_skin", "chemical", "wet_blue", "crust", "finished"];
 const UNITS: StockMove["unit"][] = ["pcs", "kg", "sqft"];
 
-function nowStamp() {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-interface Props {
-  onCreate: (move: StockMove) => void;
-}
-
-export function StockMoveDialog({ onCreate }: Props) {
+export function StockMoveDialog() {
+  const { addStockMove } = useStore();
   const [open, setOpen] = useState(false);
-  const [type, setType] = useState<StockMoveType>("IN");
+  const [type, setType] = useState<StockMove["type"]>("IN");
   const [item, setItem] = useState("");
   const [itemKind, setItemKind] = useState<StockMove["item_kind"]>("chemical");
   const [lotNo, setLotNo] = useState("");
@@ -55,35 +31,14 @@ export function StockMoveDialog({ onCreate }: Props) {
   const [ref, setRef] = useState("");
 
   const reset = () => {
-    setType("IN");
-    setItem("");
-    setItemKind("chemical");
-    setLotNo("");
-    setQty("");
-    setUnit("kg");
-    setFrom("");
-    setTo("");
-    setRef("");
+    setType("IN"); setItem(""); setItemKind("chemical"); setLotNo(""); setQty(""); setUnit("kg");
+    setFrom(""); setTo(""); setRef("");
   };
 
   const submit = () => {
-    const trimmed = {
-      item: item.trim(),
-      lot_no: lotNo.trim(),
-      from: from.trim(),
-      to: to.trim(),
-      ref: ref.trim(),
-    };
+    const trimmed = { item: item.trim(), lot_no: lotNo.trim(), from: from.trim(), to: to.trim(), ref: ref.trim() };
     const qtyNum = Number(qty);
-    if (
-      !trimmed.item ||
-      !trimmed.lot_no ||
-      !trimmed.from ||
-      !trimmed.to ||
-      !trimmed.ref ||
-      !Number.isFinite(qtyNum) ||
-      qtyNum === 0
-    ) {
+    if (!trimmed.item || !trimmed.lot_no || !trimmed.from || !trimmed.to || !trimmed.ref || !Number.isFinite(qtyNum) || qtyNum === 0) {
       toast.error("Fill all fields with a non-zero quantity");
       return;
     }
@@ -92,9 +47,7 @@ export function StockMoveDialog({ onCreate }: Props) {
         : type === "ADJUST" ? qtyNum
         : Math.abs(qtyNum);
 
-    const move: StockMove = {
-      id: `m-${Date.now()}`,
-      ts: nowStamp(),
+    const move: NewStockMove = {
       type,
       item: trimmed.item,
       item_kind: itemKind,
@@ -104,22 +57,15 @@ export function StockMoveDialog({ onCreate }: Props) {
       from: trimmed.from,
       to: trimmed.to,
       ref: trimmed.ref,
-      user: "current.user",
     };
-    onCreate(move);
+    addStockMove(move);
     toast.success(`${type} move recorded · ${trimmed.item}`);
     reset();
     setOpen(false);
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(o) => {
-        setOpen(o);
-        if (!o) reset();
-      }}
-    >
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
       <DialogTrigger asChild>
         <Button size="sm" variant="default" className="gap-1.5">
           <Plus className="h-3.5 w-3.5" /> New stock move
@@ -136,31 +82,22 @@ export function StockMoveDialog({ onCreate }: Props) {
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label>Move type</Label>
-            <Select value={type} onValueChange={(v) => setType(v as StockMoveType)}>
+            <Select value={type} onValueChange={(v) => setType(v as StockMove["type"])}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-              </SelectContent>
+              <SelectContent>{TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
             <Label>Item kind</Label>
             <Select value={itemKind} onValueChange={(v) => setItemKind(v as StockMove["item_kind"])}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {KINDS.map((k) => <SelectItem key={k} value={k}>{k.replace("_", " ")}</SelectItem>)}
-              </SelectContent>
+              <SelectContent>{KINDS.map((k) => <SelectItem key={k} value={k}>{k.replace("_", " ")}</SelectItem>)}</SelectContent>
             </Select>
           </div>
 
           <div className="space-y-1.5 col-span-2">
             <Label>Item description</Label>
-            <Input
-              value={item}
-              onChange={(e) => setItem(e.target.value)}
-              placeholder="e.g. Chrome Sulphate 33%"
-              maxLength={80}
-            />
+            <Input value={item} onChange={(e) => setItem(e.target.value)} placeholder="e.g. Chrome Sulphate 33%" maxLength={80} />
           </div>
 
           <div className="space-y-1.5">
@@ -174,21 +111,13 @@ export function StockMoveDialog({ onCreate }: Props) {
 
           <div className="space-y-1.5">
             <Label>Quantity</Label>
-            <Input
-              type="number"
-              inputMode="decimal"
-              value={qty}
-              onChange={(e) => setQty(e.target.value)}
-              placeholder={type === "ADJUST" ? "+/- delta" : "positive number"}
-            />
+            <Input type="number" inputMode="decimal" value={qty} onChange={(e) => setQty(e.target.value)} placeholder={type === "ADJUST" ? "+/- delta" : "positive number"} />
           </div>
           <div className="space-y-1.5">
             <Label>Unit</Label>
             <Select value={unit} onValueChange={(v) => setUnit(v as StockMove["unit"])}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {UNITS.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}
-              </SelectContent>
+              <SelectContent>{UNITS.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
             </Select>
           </div>
 

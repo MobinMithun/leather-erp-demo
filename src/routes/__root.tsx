@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { StoreProvider } from "@/lib/store";
 import {
   Outlet,
   Link,
@@ -77,6 +78,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
+      <StoreProvider>
       <SidebarProvider>
         <div className="flex min-h-screen w-full bg-background">
           <AppSidebar />
@@ -103,6 +105,7 @@ function RootComponent() {
         </div>
         <Toaster />
       </SidebarProvider>
+      </StoreProvider>
     </QueryClientProvider>
   );
 }
