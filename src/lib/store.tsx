@@ -150,6 +150,9 @@ export interface NewStockMove {
   ref: string;
 }
 
+export type NewChemicalLot = Omit<ChemicalLot, "id">;
+export type NewRawSkinLot = Omit<RawSkinLot, "id">;
+
 interface StoreCtx extends DB {
   // Orders
   addOrder: (o: NewOrder) => SalesOrder;
@@ -159,6 +162,8 @@ interface StoreCtx extends DB {
   advanceBatchStage: (id: string) => string;
   // Inventory
   addStockMove: (m: NewStockMove) => void;
+  addChemicalLot: (lot: NewChemicalLot) => void;
+  addRawSkinLot: (lot: NewRawSkinLot) => void;
   // QC
   addQCEntry: (q: QCRow) => void;
   // ESG
@@ -278,6 +283,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return { ...prev, stockMoves: [move, ...prev.stockMoves], chemicals, rawSkins };
       });
     },
+
+    addChemicalLot: (lot) =>
+      update((prev) => ({
+        ...prev,
+        chemicals: [...prev.chemicals, { ...lot, id: `c-${Date.now()}` }],
+      })),
+
+    addRawSkinLot: (lot) =>
+      update((prev) => ({
+        ...prev,
+        rawSkins: [...prev.rawSkins, { ...lot, id: `r-${Date.now()}` }],
+      })),
 
     addQCEntry: (q) =>
       update((prev) => ({ ...prev, qcEntries: [q, ...prev.qcEntries] })),
