@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, StatCard } from "@/components/page-shell";
-import { CHEMICALS, RAW_SKINS, INVENTORY_POOLS, fmtBDT, fmtNum } from "@/lib/mock-data";
+import { CHEMICALS, RAW_SKINS, INVENTORY_POOLS, STOCK_MOVES, fmtBDT, fmtNum } from "@/lib/mock-data";
+import { ArrowDownToLine, ArrowUpFromLine, ArrowLeftRight, SlidersHorizontal } from "lucide-react";
 
 export const Route = createFileRoute("/inventory")({
   head: () => ({ meta: [{ title: "Inventory — HIDE.OS" }] }),
