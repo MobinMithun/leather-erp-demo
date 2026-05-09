@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, StatCard } from "@/components/page-shell";
-import { CHEMICALS, RAW_SKINS, INVENTORY_POOLS, STOCK_MOVES, fmtBDT, fmtNum } from "@/lib/mock-data";
+import { CHEMICALS, RAW_SKINS, INVENTORY_POOLS, STOCK_MOVES, fmtBDT, fmtNum, type StockMove } from "@/lib/mock-data";
 import { ArrowDownToLine, ArrowUpFromLine, ArrowLeftRight, SlidersHorizontal } from "lucide-react";
+import { StockMoveDialog } from "@/components/stock-move-dialog";
 
 export const Route = createFileRoute("/inventory")({
   head: () => ({ meta: [{ title: "Inventory — HIDE.OS" }] }),
@@ -9,6 +11,7 @@ export const Route = createFileRoute("/inventory")({
 });
 
 function InventoryPage() {
+  const [moves, setMoves] = useState<StockMove[]>(STOCK_MOVES);
   return (
     <PageShell title="Inventory" subtitle="Raw skins · chemicals · finished goods pools">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -108,15 +111,18 @@ function InventoryPage() {
       </section>
 
       <section>
-        <div className="mb-2 flex items-end justify-between">
+        <div className="mb-2 flex items-end justify-between gap-3">
           <h2 className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
             Stock moves · today
           </h2>
-          <div className="flex gap-3 text-[10px] uppercase tracking-wider text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><ArrowDownToLine className="h-3 w-3 text-status-ok" />In</span>
-            <span className="inline-flex items-center gap-1"><ArrowUpFromLine className="h-3 w-3 text-status-bad" />Out</span>
-            <span className="inline-flex items-center gap-1"><ArrowLeftRight className="h-3 w-3 text-status-info" />Transfer</span>
-            <span className="inline-flex items-center gap-1"><SlidersHorizontal className="h-3 w-3 text-status-warn" />Adjust</span>
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex gap-3 text-[10px] uppercase tracking-wider text-muted-foreground">
+              <span className="inline-flex items-center gap-1"><ArrowDownToLine className="h-3 w-3 text-status-ok" />In</span>
+              <span className="inline-flex items-center gap-1"><ArrowUpFromLine className="h-3 w-3 text-status-bad" />Out</span>
+              <span className="inline-flex items-center gap-1"><ArrowLeftRight className="h-3 w-3 text-status-info" />Transfer</span>
+              <span className="inline-flex items-center gap-1"><SlidersHorizontal className="h-3 w-3 text-status-warn" />Adjust</span>
+            </div>
+            <StockMoveDialog onCreate={(m) => setMoves((prev) => [m, ...prev])} />
           </div>
         </div>
         <div className="border border-border bg-card overflow-x-auto">
@@ -135,7 +141,7 @@ function InventoryPage() {
               </tr>
             </thead>
             <tbody>
-              {STOCK_MOVES.map((m) => {
+              {moves.map((m) => {
                 const tone =
                   m.type === "IN" ? "text-status-ok"
                     : m.type === "OUT" ? "text-status-bad"
