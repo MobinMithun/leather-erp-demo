@@ -79,7 +79,7 @@ function Dashboard() {
     .slice(0, 4);
 
   const set = (patch: Partial<{ range: typeof range; species: typeof species; exit: typeof exit }>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch }) });
+    navigate({ search: (prev: { range: typeof range; species: typeof species; exit: typeof exit }) => ({ ...prev, ...patch }) });
 
   return (
     <PageShell
