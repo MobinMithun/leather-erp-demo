@@ -111,15 +111,18 @@ function InventoryPage() {
       </section>
 
       <section>
-        <div className="mb-2 flex items-end justify-between">
+        <div className="mb-2 flex items-end justify-between gap-3">
           <h2 className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
             Stock moves · today
           </h2>
-          <div className="flex gap-3 text-[10px] uppercase tracking-wider text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><ArrowDownToLine className="h-3 w-3 text-status-ok" />In</span>
-            <span className="inline-flex items-center gap-1"><ArrowUpFromLine className="h-3 w-3 text-status-bad" />Out</span>
-            <span className="inline-flex items-center gap-1"><ArrowLeftRight className="h-3 w-3 text-status-info" />Transfer</span>
-            <span className="inline-flex items-center gap-1"><SlidersHorizontal className="h-3 w-3 text-status-warn" />Adjust</span>
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex gap-3 text-[10px] uppercase tracking-wider text-muted-foreground">
+              <span className="inline-flex items-center gap-1"><ArrowDownToLine className="h-3 w-3 text-status-ok" />In</span>
+              <span className="inline-flex items-center gap-1"><ArrowUpFromLine className="h-3 w-3 text-status-bad" />Out</span>
+              <span className="inline-flex items-center gap-1"><ArrowLeftRight className="h-3 w-3 text-status-info" />Transfer</span>
+              <span className="inline-flex items-center gap-1"><SlidersHorizontal className="h-3 w-3 text-status-warn" />Adjust</span>
+            </div>
+            <StockMoveDialog onCreate={(m) => setMoves((prev) => [m, ...prev])} />
           </div>
         </div>
         <div className="border border-border bg-card overflow-x-auto">
