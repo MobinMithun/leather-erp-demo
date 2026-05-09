@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
 import { PageShell, StatCard, StatusPill } from "@/components/page-shell";
-import { ORDERS, BATCHES, STAGES, fmtBDT, fmtNum } from "@/lib/mock-data";
+import { ORDERS, BATCHES, STAGES, fmtBDT, fmtNum, type Batch } from "@/lib/mock-data";
 import { ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/orders/$orderId")({
@@ -39,7 +39,7 @@ const TIMELINE: { key: string; label: string }[] = [
 
 function OrderDetailPage() {
   const { order, batches } = Route.useLoaderData();
-  const producedPcs = batches.reduce((s, b) => s + b.pieces, 0);
+  const producedPcs = batches.reduce((s: number, b: Batch) => s + b.pieces, 0);
   const completionPct = Math.min(100, Math.round((producedPcs / order.qty_pcs) * 100));
   const activeIdx = TIMELINE.findIndex((t) => t.key === order.status);
 
@@ -94,7 +94,7 @@ function OrderDetailPage() {
                 </tr>
               </thead>
               <tbody>
-                {batches.map((b) => {
+                {batches.map((b: Batch) => {
                   const stageIdx = STAGES.findIndex((s) => s.code === b.current_stage);
                   const total = b.exit === "wet_blue" ? 7 : b.exit === "crust" ? 11 : 15;
                   const pct = Math.min(100, Math.round(((stageIdx + 1) / total) * 100));
