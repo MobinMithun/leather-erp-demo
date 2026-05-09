@@ -402,28 +402,61 @@ export function StockMoveDialog() {
 
               {/* ── TRANSFER: qty + destination ── */}
               {selected && moveType === "TRANSFER" && (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 rounded-sm border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">{selected.location}</span>
+                    <span className="text-muted-foreground">→ move to</span>
+                  </div>
+
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      From
-                    </Label>
-                    <div className="border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
-                      {selected.location}
+                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Destination</Label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[
+                        "Raw store · A1", "Raw store · A2",
+                        "Chem store",
+                        "Wet-blue store",
+                        "Crust store · C1", "Crust store · C2",
+                        "Finished store",
+                        "Sammy floor",
+                        "Other…",
+                      ].map((d) => (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => setDestination(d === "Other…" ? "__custom__" : d)}
+                          className={`border px-2.5 py-1 text-xs font-medium transition-colors ${
+                            destination === (d === "Other…" ? "__custom__" : d)
+                              ? "border-status-info bg-status-info/10 text-status-info"
+                              : "border-border bg-background text-muted-foreground hover:bg-muted"
+                          }`}
+                        >
+                          {d}
+                        </button>
+                      ))}
                     </div>
+                    {destination === "__custom__" && (
+                      <Input
+                        autoFocus
+                        value={customDest}
+                        onChange={(e) => setCustomDest(e.target.value)}
+                        placeholder="Enter location…"
+                        className="mt-1.5"
+                      />
+                    )}
                   </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">To</Label>
-                    <Input value={customDest} onChange={(e) => setCustomDest(e.target.value)} placeholder="Crust store · C2" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Qty ({selected.unit})
-                    </Label>
-                    <Input type="number" min={1} value={qty} onChange={(e) => setQty(e.target.value)} placeholder="e.g. 800" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Reference</Label>
-                    <Input value={ref} onChange={(e) => setRef(e.target.value)} placeholder="optional" />
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        Qty ({selected.unit})
+                        <span className="ml-2 normal-case text-muted-foreground">max {fmtNum(selected.available)}</span>
+                      </Label>
+                      <Input type="number" min={1} max={selected.available} value={qty} onChange={(e) => setQty(e.target.value)} placeholder="e.g. 800" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Reference</Label>
+                      <Input value={ref} onChange={(e) => setRef(e.target.value)} placeholder="optional" />
+                    </div>
                   </div>
                 </div>
               )}
