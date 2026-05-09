@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageShell, StatusPill } from "@/components/page-shell";
 import { ORDERS, fmtBDT, fmtNum } from "@/lib/mock-data";
 import { Plus, Filter, Download } from "lucide-react";
@@ -43,8 +43,10 @@ function OrdersPage() {
           </thead>
           <tbody>
             {ORDERS.map((o) => (
-              <tr key={o.id} className="border-t border-border hover:bg-muted/30">
-                <td className="px-4 py-2.5 font-mono text-xs">{o.order_no}</td>
+              <tr key={o.id} className="border-t border-border hover:bg-muted/30 cursor-pointer">
+                <td className="px-4 py-2.5 font-mono text-xs">
+                  <Link to="/orders/$orderId" params={{ orderId: o.order_no }} className="text-accent-foreground underline-offset-2 hover:underline">{o.order_no}</Link>
+                </td>
                 <td className="px-4 py-2.5">{o.customer}</td>
                 <td className="px-4 py-2.5 text-muted-foreground">{o.country}</td>
                 <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{o.article}</td>
