@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, StatCard } from "@/components/page-shell";
-import { CHEMICALS, RAW_SKINS, INVENTORY_POOLS, STOCK_MOVES, fmtBDT, fmtNum } from "@/lib/mock-data";
+import { CHEMICALS, RAW_SKINS, INVENTORY_POOLS, STOCK_MOVES, fmtBDT, fmtNum, type StockMove } from "@/lib/mock-data";
 import { ArrowDownToLine, ArrowUpFromLine, ArrowLeftRight, SlidersHorizontal } from "lucide-react";
+import { StockMoveDialog } from "@/components/stock-move-dialog";
 
 export const Route = createFileRoute("/inventory")({
   head: () => ({ meta: [{ title: "Inventory — HIDE.OS" }] }),
@@ -9,6 +11,7 @@ export const Route = createFileRoute("/inventory")({
 });
 
 function InventoryPage() {
+  const [moves, setMoves] = useState<StockMove[]>(STOCK_MOVES);
   return (
     <PageShell title="Inventory" subtitle="Raw skins · chemicals · finished goods pools">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
