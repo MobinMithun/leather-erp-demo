@@ -5,7 +5,15 @@ import { PageShell, StatCard, StatusPill } from "@/components/page-shell";
 import { INVENTORY_POOLS, fmtBDT, fmtNum, STAGE_THROUGHPUT } from "@/lib/mock-data";
 import { useStore } from "@/lib/store";
 import {
-  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  BarChart,
+  Bar,
 } from "recharts";
 
 const searchSchema = z.object({
@@ -38,8 +46,14 @@ const EXITS: { value: "all" | "wet_blue" | "crust" | "finished"; label: string }
 ];
 
 function FilterPills<T extends string>({
-  options, value, onChange,
-}: { options: { value: T; label: string }[]; value: T; onChange: (v: T) => void }) {
+  options,
+  value,
+  onChange,
+}: {
+  options: { value: T; label: string }[];
+  value: T;
+  onChange: (v: T) => void;
+}) {
   return (
     <div className="inline-flex border border-border bg-card">
       {options.map((o) => (
@@ -47,7 +61,9 @@ function FilterPills<T extends string>({
           key={o.value}
           onClick={() => onChange(o.value)}
           className={`px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider border-r border-border last:border-r-0 ${
-            value === o.value ? "bg-accent/15 text-accent-foreground" : "text-muted-foreground hover:bg-muted"
+            value === o.value
+              ? "bg-accent/15 text-accent-foreground"
+              : "text-muted-foreground hover:bg-muted"
           }`}
         >
           {o.label}
@@ -65,9 +81,8 @@ function Dashboard() {
   const days = RANGES.find((r) => r.value === range)?.days ?? 10;
   const esgData = esgEntries.slice(-days);
 
-  const filteredBatches = batches.filter((b) =>
-    (species === "all" || b.species === species) &&
-    (exit === "all" || b.exit === exit)
+  const filteredBatches = batches.filter(
+    (b) => (species === "all" || b.species === species) && (exit === "all" || b.exit === exit),
   );
   const recentBatches = filteredBatches.slice(0, 6);
 
@@ -79,17 +94,27 @@ function Dashboard() {
     .filter((o) => o.status === "in_production" || o.status === "confirmed")
     .slice(0, 4);
 
-  const set = (patch: Partial<{ range: typeof range; species: typeof species; exit: typeof exit }>) =>
-    navigate({ search: (prev: { range: typeof range; species: typeof species; exit: typeof exit }) => ({ ...prev, ...patch }) });
+  const set = (
+    patch: Partial<{ range: typeof range; species: typeof species; exit: typeof exit }>,
+  ) =>
+    navigate({
+      search: (prev: { range: typeof range; species: typeof species; exit: typeof exit }) => ({
+        ...prev,
+        ...patch,
+      }),
+    });
 
   // Live KPIs
-  const activeOrders = orders.filter((o) => o.status === "in_production" || o.status === "confirmed").length;
+  const activeOrders = orders.filter(
+    (o) => o.status === "in_production" || o.status === "confirmed",
+  ).length;
   const activeBatches = filteredBatches.filter((b) => b.status !== "done").length;
   const piecesInWip = batches.filter((b) => b.status !== "done").reduce((s, b) => s + b.pieces, 0);
   const lastESG = esgEntries.length > 0 ? esgEntries[esgEntries.length - 1] : null;
-  const avgQCYield = qcEntries.length > 0
-    ? (qcEntries.slice(-4).reduce((s, q) => s + q.yield_pct, 0) / Math.min(4, qcEntries.length))
-    : 97.5;
+  const avgQCYield =
+    qcEntries.length > 0
+      ? qcEntries.slice(-4).reduce((s, q) => s + q.yield_pct, 0) / Math.min(4, qcEntries.length)
+      : 97.5;
 
   return (
     <PageShell
@@ -105,25 +130,49 @@ function Dashboard() {
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard label="Active orders" value={activeOrders} sub="open + in production" />
-        <StatCard label="Active batches" value={activeBatches} sub={species === "all" ? "all species" : `${species} only`} />
+        <StatCard
+          label="Active batches"
+          value={activeBatches}
+          sub={species === "all" ? "all species" : `${species} only`}
+        />
         <StatCard label="Pieces in WIP" value={fmtNum(piecesInWip)} tone="info" />
         <StatCard label="On-time delivery" value="92.4%" tone="ok" sub="trailing 30 days" />
-        <StatCard label="Finished sq ft" value={fmtNum(INVENTORY_POOLS[2].sqft)} sub="ready for dispatch" />
+        <StatCard
+          label="Finished sq ft"
+          value={fmtNum(INVENTORY_POOLS[2].sqft)}
+          sub="ready for dispatch"
+        />
         <StatCard label="QC yield" value={`${avgQCYield.toFixed(1)}%`} tone="ok" />
-        <StatCard label="Water today" value={lastESG ? `${lastESG.water_m3} m³` : "—"} tone="info" />
-        <StatCard label="Chrome today" value={lastESG ? `${lastESG.chrome_kg} kg` : "—"} tone="warn" />
+        <StatCard
+          label="Water today"
+          value={lastESG ? `${lastESG.water_m3} m³` : "—"}
+          tone="info"
+        />
+        <StatCard
+          label="Chrome today"
+          value={lastESG ? `${lastESG.chrome_kg} kg` : "—"}
+          tone="warn"
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         <div className="border border-border bg-card p-4 lg:col-span-2">
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">ESG · {days}-day trend</div>
+              <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                ESG · {days}-day trend
+              </div>
               <div className="text-sm font-medium">Water (m³) vs Chrome (kg)</div>
             </div>
             <div className="flex items-center gap-3 text-[10px] uppercase tracking-wider text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 bg-chart-1" />Water</span>
-              <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 bg-accent" />Chrome</span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-2 w-2 bg-chart-1" />
+                Water
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-2 w-2 bg-accent" />
+                Chrome
+              </span>
             </div>
           </div>
           <div className="h-64">
@@ -140,15 +189,46 @@ function Dashboard() {
                       <stop offset="100%" stopColor="oklch(0.72 0.16 55)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid stroke="oklch(0.88 0.006 250)" strokeDasharray="2 4" vertical={false} />
-                  <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "oklch(0.48 0.012 250)" }} />
-                  <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "oklch(0.48 0.012 250)" }} />
+                  <CartesianGrid
+                    stroke="oklch(0.88 0.006 250)"
+                    strokeDasharray="2 4"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 10, fill: "oklch(0.48 0.012 250)" }}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 10, fill: "oklch(0.48 0.012 250)" }}
+                  />
                   <Tooltip
-                    contentStyle={{ background: "oklch(0.20 0.01 250)", border: "none", borderRadius: 4, fontSize: 12, color: "white" }}
+                    contentStyle={{
+                      background: "oklch(0.20 0.01 250)",
+                      border: "none",
+                      borderRadius: 4,
+                      fontSize: 12,
+                      color: "white",
+                    }}
                     labelStyle={{ color: "oklch(0.88 0.004 250)" }}
                   />
-                  <Area type="monotone" dataKey="water_m3" stroke="oklch(0.55 0.15 250)" fill="url(#g1)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="chrome_kg" stroke="oklch(0.72 0.16 55)" fill="url(#g2)" strokeWidth={2} />
+                  <Area
+                    type="monotone"
+                    dataKey="water_m3"
+                    stroke="oklch(0.55 0.15 250)"
+                    fill="url(#g1)"
+                    strokeWidth={2}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="chrome_kg"
+                    stroke="oklch(0.72 0.16 55)"
+                    fill="url(#g2)"
+                    strokeWidth={2}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
@@ -161,17 +241,38 @@ function Dashboard() {
 
         <div className="border border-border bg-card p-4">
           <div className="mb-3">
-            <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Throughput</div>
+            <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              Throughput
+            </div>
             <div className="text-sm font-medium">Pieces by stage · today</div>
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={STAGE_THROUGHPUT} margin={{ left: -20, right: 8, top: 4, bottom: 0 }}>
-                <CartesianGrid stroke="oklch(0.88 0.006 250)" strokeDasharray="2 4" vertical={false} />
-                <XAxis dataKey="stage" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "oklch(0.48 0.012 250)" }} />
-                <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "oklch(0.48 0.012 250)" }} />
+                <CartesianGrid
+                  stroke="oklch(0.88 0.006 250)"
+                  strokeDasharray="2 4"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="stage"
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 10, fill: "oklch(0.48 0.012 250)" }}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 10, fill: "oklch(0.48 0.012 250)" }}
+                />
                 <Tooltip
-                  contentStyle={{ background: "oklch(0.20 0.01 250)", border: "none", borderRadius: 4, fontSize: 12, color: "white" }}
+                  contentStyle={{
+                    background: "oklch(0.20 0.01 250)",
+                    border: "none",
+                    borderRadius: 4,
+                    fontSize: 12,
+                    color: "white",
+                  }}
                   cursor={{ fill: "oklch(0.95 0.004 250)" }}
                 />
                 <Bar dataKey="pieces" fill="oklch(0.28 0.02 250)" radius={[2, 2, 0, 0]} />
@@ -185,12 +286,20 @@ function Dashboard() {
         <div className="border border-border bg-card">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div>
-              <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Production</div>
+              <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Production
+              </div>
               <div className="text-sm font-medium">
-                Active batches{species !== "all" ? ` · ${species}` : ""}{exit !== "all" ? ` · ${exit.replace("_", "-")}` : ""}
+                Active batches{species !== "all" ? ` · ${species}` : ""}
+                {exit !== "all" ? ` · ${exit.replace("_", "-")}` : ""}
               </div>
             </div>
-            <Link to="/batches" className="text-xs text-accent-foreground underline-offset-2 hover:underline">View all →</Link>
+            <Link
+              to="/batches"
+              className="text-xs text-accent-foreground underline-offset-2 hover:underline"
+            >
+              View all →
+            </Link>
           </div>
           <table className="w-full text-sm tabular">
             <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -204,16 +313,26 @@ function Dashboard() {
             </thead>
             <tbody>
               {recentBatches.length === 0 ? (
-                <tr><td colSpan={5} className="px-4 py-8 text-center text-xs text-muted-foreground">No batches match filters</td></tr>
-              ) : recentBatches.map((b) => (
-                <tr key={b.id} className="border-t border-border hover:bg-muted/30">
-                  <td className="px-4 py-2 font-mono text-xs">{b.batch_no}</td>
-                  <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{b.article}</td>
-                  <td className="px-4 py-2 text-xs">{b.drum}</td>
-                  <td className="px-4 py-2 text-right">{b.pieces}</td>
-                  <td className="px-4 py-2"><StatusPill status={b.status} /></td>
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-xs text-muted-foreground">
+                    No batches match filters
+                  </td>
                 </tr>
-              ))}
+              ) : (
+                recentBatches.map((b) => (
+                  <tr key={b.id} className="border-t border-border hover:bg-muted/30">
+                    <td className="px-4 py-2 font-mono text-xs">{b.batch_no}</td>
+                    <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
+                      {b.article}
+                    </td>
+                    <td className="px-4 py-2 text-xs">{b.drum}</td>
+                    <td className="px-4 py-2 text-right">{b.pieces}</td>
+                    <td className="px-4 py-2">
+                      <StatusPill status={b.status} />
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -221,10 +340,17 @@ function Dashboard() {
         <div className="border border-border bg-card">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div>
-              <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Sales</div>
+              <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Sales
+              </div>
               <div className="text-sm font-medium">Open orders</div>
             </div>
-            <Link to="/orders" className="text-xs text-accent-foreground underline-offset-2 hover:underline">View all →</Link>
+            <Link
+              to="/orders"
+              className="text-xs text-accent-foreground underline-offset-2 hover:underline"
+            >
+              View all →
+            </Link>
           </div>
           <table className="w-full text-sm tabular">
             <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -238,20 +364,32 @@ function Dashboard() {
             </thead>
             <tbody>
               {urgentOrders.length === 0 ? (
-                <tr><td colSpan={5} className="px-4 py-8 text-center text-xs text-muted-foreground">No orders match filters</td></tr>
-              ) : urgentOrders.map((o) => (
-                <tr key={o.id} className="border-t border-border hover:bg-muted/30">
-                  <td className="px-4 py-2 font-mono text-xs">
-                    <Link to="/orders/$orderId" params={{ orderId: o.order_no }} className="text-accent-foreground underline-offset-2 hover:underline">
-                      {o.order_no}
-                    </Link>
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-xs text-muted-foreground">
+                    No orders match filters
                   </td>
-                  <td className="px-4 py-2 text-xs">{o.customer}</td>
-                  <td className="px-4 py-2 text-right">{fmtNum(o.qty_pcs)}</td>
-                  <td className="px-4 py-2 text-xs">{o.due_date}</td>
-                  <td className="px-4 py-2"><StatusPill status={o.status} /></td>
                 </tr>
-              ))}
+              ) : (
+                urgentOrders.map((o) => (
+                  <tr key={o.id} className="border-t border-border hover:bg-muted/30">
+                    <td className="px-4 py-2 font-mono text-xs">
+                      <Link
+                        to="/orders/$orderId"
+                        params={{ orderId: o.order_no }}
+                        className="text-accent-foreground underline-offset-2 hover:underline"
+                      >
+                        {o.order_no}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-2 text-xs">{o.customer}</td>
+                    <td className="px-4 py-2 text-right">{fmtNum(o.qty_pcs)}</td>
+                    <td className="px-4 py-2 text-xs">{o.due_date}</td>
+                    <td className="px-4 py-2">
+                      <StatusPill status={o.status} />
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -267,7 +405,9 @@ function Dashboard() {
               <div className="text-2xl font-semibold tabular">{fmtNum(p.pieces)}</div>
               <div className="text-xs text-muted-foreground">{fmtNum(p.sqft)} sq ft</div>
             </div>
-            <div className="mt-2 text-xs font-medium text-accent-foreground tabular">{fmtBDT(p.value_bdt)}</div>
+            <div className="mt-2 text-xs font-medium text-accent-foreground tabular">
+              {fmtBDT(p.value_bdt)}
+            </div>
           </div>
         ))}
       </div>

@@ -87,7 +87,9 @@ function loadDB(): DB {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw) as DB;
-  } catch {}
+  } catch (error) {
+    console.warn("Unable to load saved ERP demo state; using seed data instead.", error);
+  }
   return seedDB();
 }
 
@@ -95,7 +97,9 @@ function saveDB(db: DB) {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
-  } catch {}
+  } catch (error) {
+    console.warn("Unable to persist ERP demo state.", error);
+  }
 }
 
 function nowStamp() {
@@ -171,7 +175,13 @@ interface StoreCtx extends DB {
   // Recipes
   addRecipe: (r: Omit<RecipeRow, "id">) => void;
   // Pieces
-  gradePiece: (id: string, grade: PieceRow["grade"], sqft: number, thickness_mm: number, defect: string | null) => void;
+  gradePiece: (
+    id: string,
+    grade: PieceRow["grade"],
+    sqft: number,
+    thickness_mm: number,
+    defect: string | null,
+  ) => void;
   // Reset
   resetDB: () => void;
 }
@@ -277,13 +287,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         let chemicals = prev.chemicals;
         if (m.item_kind === "chemical" && (m.type === "OUT" || m.type === "ADJUST")) {
           chemicals = chemicals.map((c) =>
-            c.lot_no === m.lot_no ? { ...c, qty_kg: Math.max(0, c.qty_kg + m.qty) } : c
+            c.lot_no === m.lot_no ? { ...c, qty_kg: Math.max(0, c.qty_kg + m.qty) } : c,
           );
         }
         let rawSkins = prev.rawSkins;
         if (m.item_kind === "raw_skin" && (m.type === "OUT" || m.type === "ADJUST")) {
           rawSkins = rawSkins.map((r) =>
-            r.lot_no === m.lot_no ? { ...r, pieces: Math.max(0, r.pieces + m.qty) } : r
+            r.lot_no === m.lot_no ? { ...r, pieces: Math.max(0, r.pieces + m.qty) } : r,
           );
         }
         return { ...prev, stockMoves: [move, ...prev.stockMoves], chemicals, rawSkins };
@@ -302,11 +312,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         rawSkins: [...prev.rawSkins, { ...lot, id: `r-${Date.now()}` }],
       })),
 
-    addQCEntry: (q) =>
-      update((prev) => ({ ...prev, qcEntries: [q, ...prev.qcEntries] })),
+    addQCEntry: (q) => update((prev) => ({ ...prev, qcEntries: [q, ...prev.qcEntries] })),
 
-    addESGEntry: (e) =>
-      update((prev) => ({ ...prev, esgEntries: [...prev.esgEntries, e] })),
+    addESGEntry: (e) => update((prev) => ({ ...prev, esgEntries: [...prev.esgEntries, e] })),
 
     addRecipe: (r) =>
       update((prev) => ({
@@ -318,7 +326,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       update((prev) => ({
         ...prev,
         pieces: prev.pieces.map((p) =>
-          p.id === id ? { ...p, grade, sqft, thickness_mm, defect: defect || null } : p
+          p.id === id ? { ...p, grade, sqft, thickness_mm, defect: defect || null } : p,
         ),
       })),
 

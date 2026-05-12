@@ -55,21 +55,29 @@ function BatchesPage() {
               return (
                 <tr key={b.id} className="border-t border-border hover:bg-muted/30">
                   <td className="px-4 py-2.5 font-mono text-xs">{b.batch_no}</td>
-                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{b.order_no}</td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">
+                    {b.order_no}
+                  </td>
                   <td className="px-4 py-2.5 font-mono text-xs">{b.article}</td>
                   <td className="px-4 py-2.5 capitalize">{b.species}</td>
                   <td className="px-4 py-2.5 text-right">{fmtNum(b.raw_kg)}</td>
                   <td className="px-4 py-2.5 text-right">{b.pieces}</td>
                   <td className="px-4 py-2.5">{b.drum}</td>
-                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{b.recipe}</td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">
+                    {b.recipe}
+                  </td>
                   <td className="px-4 py-2.5 text-xs uppercase">{b.exit.replace("_", "-")}</td>
-                  <td className="px-4 py-2.5"><StatusPill status={b.status} /></td>
+                  <td className="px-4 py-2.5">
+                    <StatusPill status={b.status} />
+                  </td>
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-2">
                       <div className="h-1.5 flex-1 bg-muted">
                         <div className="h-full bg-accent" style={{ width: `${pct}%` }} />
                       </div>
-                      <span className="text-[10px] text-muted-foreground tabular w-8 text-right">{pct}%</span>
+                      <span className="text-[10px] text-muted-foreground tabular w-8 text-right">
+                        {pct}%
+                      </span>
                     </div>
                   </td>
                   <td className="px-4 py-2.5">
@@ -110,10 +118,12 @@ function BatchesPage() {
         </div>
         <div className="mt-3 flex gap-4 text-[10px] uppercase tracking-wider text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-2 bg-muted border border-border" />Batch-level
+            <span className="h-2 w-2 bg-muted border border-border" />
+            Batch-level
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-2 bg-accent/30 border border-accent/40" />Piece-level
+            <span className="h-2 w-2 bg-accent/30 border border-accent/40" />
+            Piece-level
           </span>
         </div>
       </div>

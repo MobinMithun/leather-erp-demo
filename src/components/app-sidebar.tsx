@@ -62,7 +62,9 @@ export function AppSidebar() {
             <Factory className="h-4 w-4" />
           </div>
           <div className="flex flex-col leading-tight group-data-[collapsible=icon]:hidden">
-            <span className="text-xs uppercase tracking-widest text-sidebar-foreground/60">Tannery</span>
+            <span className="text-xs uppercase tracking-widest text-sidebar-foreground/60">
+              Tannery
+            </span>
             <span className="text-sm font-semibold text-sidebar-foreground">HIDE.OS</span>
           </div>
         </div>
