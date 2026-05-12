@@ -1,7 +1,15 @@
 {
-  "buildCommand": "npm run build:vercel",
-  "outputDirectory": "dist/client",
+  "buildCommand": "npm run build",
+  "functions": {
+    "api/index.ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "public": "dist/client",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/(.*)",
+      "destination": "/api"
+    }
   ]
 }
