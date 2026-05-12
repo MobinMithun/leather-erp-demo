@@ -3,7 +3,12 @@ import { Plus, Search, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,10 +50,20 @@ export function StockMoveDialog() {
   const [inTo, setInTo] = useState("");
 
   const reset = () => {
-    setMoveType("OUT"); setItemSearch(""); setSelected(null);
-    setQty(""); setDestination(""); setCustomDest(""); setRef("");
-    setAdjustDelta(""); setInItem(""); setInLot(""); setInQty("");
-    setInUnit("kg"); setInFrom(""); setInTo("");
+    setMoveType("OUT");
+    setItemSearch("");
+    setSelected(null);
+    setQty("");
+    setDestination("");
+    setCustomDest("");
+    setRef("");
+    setAdjustDelta("");
+    setInItem("");
+    setInLot("");
+    setInQty("");
+    setInUnit("kg");
+    setInFrom("");
+    setInTo("");
   };
 
   // Build unified item list from chemicals + raw skins
@@ -78,7 +93,7 @@ export function StockMoveDialog() {
     ? allItems.filter(
         (i) =>
           i.name.toLowerCase().includes(itemSearch.toLowerCase()) ||
-          i.lot_no.toLowerCase().includes(itemSearch.toLowerCase())
+          i.lot_no.toLowerCase().includes(itemSearch.toLowerCase()),
       )
     : allItems;
 
@@ -94,12 +109,24 @@ export function StockMoveDialog() {
   };
 
   const submitOut = () => {
-    if (!selected) { toast.error("Select an item first"); return; }
+    if (!selected) {
+      toast.error("Select an item first");
+      return;
+    }
     const qtyNum = Number(qty);
-    if (!qtyNum || qtyNum <= 0) { toast.error("Enter a valid quantity"); return; }
-    if (qtyNum > selected.available) { toast.error(`Only ${fmtNum(selected.available)} ${selected.unit} available`); return; }
+    if (!qtyNum || qtyNum <= 0) {
+      toast.error("Enter a valid quantity");
+      return;
+    }
+    if (qtyNum > selected.available) {
+      toast.error(`Only ${fmtNum(selected.available)} ${selected.unit} available`);
+      return;
+    }
     const dest = destination === "__custom__" ? customDest.trim() : destination;
-    if (!dest) { toast.error("Select or enter a destination"); return; }
+    if (!dest) {
+      toast.error("Select or enter a destination");
+      return;
+    }
     addStockMove({
       type: "OUT",
       item: selected.name,
@@ -112,15 +139,25 @@ export function StockMoveDialog() {
       ref: ref.trim() || dest,
     });
     toast.success(`OUT · ${selected.name} · ${fmtNum(qtyNum)} ${selected.unit} → ${dest}`);
-    reset(); setOpen(false);
+    reset();
+    setOpen(false);
   };
 
   const submitTransfer = () => {
-    if (!selected) { toast.error("Select an item first"); return; }
+    if (!selected) {
+      toast.error("Select an item first");
+      return;
+    }
     const qtyNum = Number(qty);
-    if (!qtyNum || qtyNum <= 0) { toast.error("Enter a valid quantity"); return; }
+    if (!qtyNum || qtyNum <= 0) {
+      toast.error("Enter a valid quantity");
+      return;
+    }
     const dest = destination === "__custom__" ? customDest.trim() : destination;
-    if (!dest) { toast.error("Enter a destination"); return; }
+    if (!dest) {
+      toast.error("Enter a destination");
+      return;
+    }
     addStockMove({
       type: "TRANSFER",
       item: selected.name,
@@ -133,13 +170,20 @@ export function StockMoveDialog() {
       ref: ref.trim() || "TRANSFER",
     });
     toast.success(`TRANSFER · ${selected.name} → ${dest}`);
-    reset(); setOpen(false);
+    reset();
+    setOpen(false);
   };
 
   const submitAdjust = () => {
-    if (!selected) { toast.error("Select an item first"); return; }
+    if (!selected) {
+      toast.error("Select an item first");
+      return;
+    }
     const delta = Number(adjustDelta);
-    if (!Number.isFinite(delta) || delta === 0) { toast.error("Enter a non-zero delta"); return; }
+    if (!Number.isFinite(delta) || delta === 0) {
+      toast.error("Enter a non-zero delta");
+      return;
+    }
     addStockMove({
       type: "ADJUST",
       item: selected.name,
@@ -152,7 +196,8 @@ export function StockMoveDialog() {
       ref: ref.trim() || "ADJUST",
     });
     toast.success(`ADJUST · ${selected.name} · ${delta > 0 ? "+" : ""}${delta} ${selected.unit}`);
-    reset(); setOpen(false);
+    reset();
+    setOpen(false);
   };
 
   const submitIn = () => {
@@ -172,7 +217,8 @@ export function StockMoveDialog() {
       ref: ref.trim() || "GRN",
     });
     toast.success(`IN · ${inItem.trim()}`);
-    reset(); setOpen(false);
+    reset();
+    setOpen(false);
   };
 
   const handleSubmit = () => {
@@ -183,14 +229,20 @@ export function StockMoveDialog() {
   };
 
   const typeColors: Record<StockMove["type"], string> = {
-    OUT:      "border-status-bad   bg-status-bad/10   text-status-bad",
+    OUT: "border-status-bad   bg-status-bad/10   text-status-bad",
     TRANSFER: "border-status-info  bg-status-info/10  text-status-info",
-    ADJUST:   "border-status-warn  bg-status-warn/10  text-status-warn",
-    IN:       "border-status-ok    bg-status-ok/10    text-status-ok",
+    ADJUST: "border-status-warn  bg-status-warn/10  text-status-warn",
+    IN: "border-status-ok    bg-status-ok/10    text-status-ok",
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o) reset();
+      }}
+    >
       <Button size="sm" variant="default" className="gap-1.5" onClick={() => setOpen(true)}>
         <Plus className="h-3.5 w-3.5" /> New stock move
       </Button>
@@ -207,9 +259,15 @@ export function StockMoveDialog() {
             {MOVE_TYPES.map((t) => (
               <button
                 key={t}
-                onClick={() => { setMoveType(t); setSelected(null); setItemSearch(""); }}
+                onClick={() => {
+                  setMoveType(t);
+                  setSelected(null);
+                  setItemSearch("");
+                }}
                 className={`flex-1 border py-2 text-xs font-medium uppercase tracking-wider transition-colors ${
-                  moveType === t ? typeColors[t] : "border-border bg-background text-muted-foreground hover:bg-muted"
+                  moveType === t
+                    ? typeColors[t]
+                    : "border-border bg-background text-muted-foreground hover:bg-muted"
                 }`}
               >
                 {t}
@@ -225,39 +283,81 @@ export function StockMoveDialog() {
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-2 space-y-1.5">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Item</Label>
-                  <Input value={inItem} onChange={(e) => setInItem(e.target.value)} placeholder="Chrome Sulphate 33%" />
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Item
+                  </Label>
+                  <Input
+                    value={inItem}
+                    onChange={(e) => setInItem(e.target.value)}
+                    placeholder="Chrome Sulphate 33%"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Lot #</Label>
-                  <Input value={inLot} onChange={(e) => setInLot(e.target.value)} placeholder="CS-2605-A" />
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Lot #
+                  </Label>
+                  <Input
+                    value={inLot}
+                    onChange={(e) => setInLot(e.target.value)}
+                    placeholder="CS-2605-A"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Reference</Label>
-                  <Input value={ref} onChange={(e) => setRef(e.target.value)} placeholder="GRN-001" />
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Reference
+                  </Label>
+                  <Input
+                    value={ref}
+                    onChange={(e) => setRef(e.target.value)}
+                    placeholder="GRN-001"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Qty</Label>
-                  <Input type="number" min={0} value={inQty} onChange={(e) => setInQty(e.target.value)} />
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Qty
+                  </Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={inQty}
+                    onChange={(e) => setInQty(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Unit</Label>
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Unit
+                  </Label>
                   <div className="flex gap-1">
-                    {(["kg","pcs","sqft"] as const).map((u) => (
-                      <button key={u} onClick={() => setInUnit(u)}
-                        className={`flex-1 border py-1.5 text-xs uppercase ${inUnit === u ? "border-accent bg-accent/10 text-accent-foreground" : "border-border text-muted-foreground hover:bg-muted"}`}>
+                    {(["kg", "pcs", "sqft"] as const).map((u) => (
+                      <button
+                        key={u}
+                        onClick={() => setInUnit(u)}
+                        className={`flex-1 border py-1.5 text-xs uppercase ${inUnit === u ? "border-accent bg-accent/10 text-accent-foreground" : "border-border text-muted-foreground hover:bg-muted"}`}
+                      >
                         {u}
                       </button>
                     ))}
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">From</Label>
-                  <Input value={inFrom} onChange={(e) => setInFrom(e.target.value)} placeholder="Supplier" />
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    From
+                  </Label>
+                  <Input
+                    value={inFrom}
+                    onChange={(e) => setInFrom(e.target.value)}
+                    placeholder="Supplier"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">To</Label>
-                  <Input value={inTo} onChange={(e) => setInTo(e.target.value)} placeholder="Chem store" />
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    To
+                  </Label>
+                  <Input
+                    value={inTo}
+                    onChange={(e) => setInTo(e.target.value)}
+                    placeholder="Chem store"
+                  />
                 </div>
               </div>
             </div>
@@ -269,7 +369,9 @@ export function StockMoveDialog() {
               {/* Item picker */}
               {!selected ? (
                 <div className="space-y-2">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Select item</Label>
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Select item
+                  </Label>
                   <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                     <input
@@ -282,25 +384,33 @@ export function StockMoveDialog() {
                   </div>
                   <div className="max-h-52 overflow-y-auto border border-border bg-card divide-y divide-border">
                     {filteredItems.length === 0 ? (
-                      <p className="px-3 py-4 text-center text-xs text-muted-foreground">No items match</p>
-                    ) : filteredItems.map((item) => (
-                      <button
-                        key={item.id}
-                        onClick={() => selectItem(item)}
-                        className="w-full flex items-center justify-between px-3 py-2.5 text-left hover:bg-muted/50 transition-colors"
-                      >
-                        <div>
-                          <div className="text-sm font-medium">{item.name}</div>
-                          <div className="text-[10px] font-mono text-muted-foreground">{item.lot_no}</div>
-                        </div>
-                        <div className="text-right shrink-0 ml-3">
-                          <div className={`text-xs font-medium tabular ${item.available === 0 ? "text-status-bad" : "text-foreground"}`}>
-                            {fmtNum(item.available)} {item.unit}
+                      <p className="px-3 py-4 text-center text-xs text-muted-foreground">
+                        No items match
+                      </p>
+                    ) : (
+                      filteredItems.map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => selectItem(item)}
+                          className="w-full flex items-center justify-between px-3 py-2.5 text-left hover:bg-muted/50 transition-colors"
+                        >
+                          <div>
+                            <div className="text-sm font-medium">{item.name}</div>
+                            <div className="text-[10px] font-mono text-muted-foreground">
+                              {item.lot_no}
+                            </div>
                           </div>
-                          <div className="text-[10px] text-muted-foreground">{item.location}</div>
-                        </div>
-                      </button>
-                    ))}
+                          <div className="text-right shrink-0 ml-3">
+                            <div
+                              className={`text-xs font-medium tabular ${item.available === 0 ? "text-status-bad" : "text-foreground"}`}
+                            >
+                              {fmtNum(item.available)} {item.unit}
+                            </div>
+                            <div className="text-[10px] text-muted-foreground">{item.location}</div>
+                          </div>
+                        </button>
+                      ))
+                    )}
                   </div>
                 </div>
               ) : (
@@ -314,10 +424,15 @@ export function StockMoveDialog() {
                   </div>
                   <div className="flex items-center gap-3 shrink-0 ml-3">
                     <div className="text-right">
-                      <div className="text-xs font-medium tabular">{fmtNum(selected.available)} {selected.unit}</div>
+                      <div className="text-xs font-medium tabular">
+                        {fmtNum(selected.available)} {selected.unit}
+                      </div>
                       <div className="text-[10px] text-muted-foreground">available</div>
                     </div>
-                    <button onClick={() => setSelected(null)} className="text-[10px] text-muted-foreground underline hover:text-foreground">
+                    <button
+                      onClick={() => setSelected(null)}
+                      className="text-[10px] text-muted-foreground underline hover:text-foreground"
+                    >
                       change
                     </button>
                   </div>
@@ -330,7 +445,9 @@ export function StockMoveDialog() {
                   <div className="space-y-1.5">
                     <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
                       Quantity ({selected.unit})
-                      <span className="ml-2 normal-case text-muted-foreground">max {fmtNum(selected.available)}</span>
+                      <span className="ml-2 normal-case text-muted-foreground">
+                        max {fmtNum(selected.available)}
+                      </span>
                     </Label>
                     <Input
                       type="number"
@@ -344,7 +461,9 @@ export function StockMoveDialog() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Destination</Label>
+                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Destination
+                    </Label>
                     <div className="flex flex-wrap gap-1.5">
                       {[...DRUMS, "Dispatch", "Waste", "Other…"].map((d) => (
                         <button
@@ -373,7 +492,8 @@ export function StockMoveDialog() {
 
                   <div className="space-y-1.5">
                     <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Reference <span className="normal-case text-muted-foreground">(batch / order)</span>
+                      Reference{" "}
+                      <span className="normal-case text-muted-foreground">(batch / order)</span>
                     </Label>
                     <div className="flex flex-wrap gap-1.5">
                       {recentBatchRefs.map((b) => (
@@ -409,13 +529,17 @@ export function StockMoveDialog() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Destination</Label>
+                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Destination
+                    </Label>
                     <div className="flex flex-wrap gap-1.5">
                       {[
-                        "Raw store · A1", "Raw store · A2",
+                        "Raw store · A1",
+                        "Raw store · A2",
                         "Chem store",
                         "Wet-blue store",
-                        "Crust store · C1", "Crust store · C2",
+                        "Crust store · C1",
+                        "Crust store · C2",
                         "Finished store",
                         "Sammy floor",
                         "Other…",
@@ -449,13 +573,28 @@ export function StockMoveDialog() {
                     <div className="space-y-1.5">
                       <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
                         Qty ({selected.unit})
-                        <span className="ml-2 normal-case text-muted-foreground">max {fmtNum(selected.available)}</span>
+                        <span className="ml-2 normal-case text-muted-foreground">
+                          max {fmtNum(selected.available)}
+                        </span>
                       </Label>
-                      <Input type="number" min={1} max={selected.available} value={qty} onChange={(e) => setQty(e.target.value)} placeholder="e.g. 800" />
+                      <Input
+                        type="number"
+                        min={1}
+                        max={selected.available}
+                        value={qty}
+                        onChange={(e) => setQty(e.target.value)}
+                        placeholder="e.g. 800"
+                      />
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Reference</Label>
-                      <Input value={ref} onChange={(e) => setRef(e.target.value)} placeholder="optional" />
+                      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        Reference
+                      </Label>
+                      <Input
+                        value={ref}
+                        onChange={(e) => setRef(e.target.value)}
+                        placeholder="optional"
+                      />
                     </div>
                   </div>
                 </div>
@@ -466,7 +605,8 @@ export function StockMoveDialog() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Delta ({selected.unit}) <span className="normal-case text-muted-foreground">use − for write-off</span>
+                      Delta ({selected.unit}){" "}
+                      <span className="normal-case text-muted-foreground">use − for write-off</span>
                     </Label>
                     <Input
                       type="number"
@@ -476,13 +616,21 @@ export function StockMoveDialog() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Reason</Label>
-                    <Input value={ref} onChange={(e) => setRef(e.target.value)} placeholder="recount, damage…" />
+                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Reason
+                    </Label>
+                    <Input
+                      value={ref}
+                      onChange={(e) => setRef(e.target.value)}
+                      placeholder="recount, damage…"
+                    />
                   </div>
                   {adjustDelta && selected && (
                     <div className="col-span-2 rounded-sm border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-                      After adjust: <span className="font-medium text-foreground">
-                        {fmtNum(Math.max(0, selected.available + Number(adjustDelta)))} {selected.unit}
+                      After adjust:{" "}
+                      <span className="font-medium text-foreground">
+                        {fmtNum(Math.max(0, selected.available + Number(adjustDelta)))}{" "}
+                        {selected.unit}
                       </span>{" "}
                       (was {fmtNum(selected.available)} {selected.unit})
                     </div>
@@ -494,7 +642,16 @@ export function StockMoveDialog() {
         </div>
 
         <DialogFooter className="mt-2">
-          <Button variant="outline" size="sm" onClick={() => { setOpen(false); reset(); }}>Cancel</Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setOpen(false);
+              reset();
+            }}
+          >
+            Cancel
+          </Button>
           <Button
             size="sm"
             onClick={handleSubmit}

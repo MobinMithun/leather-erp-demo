@@ -5,7 +5,13 @@ import { fmtBDT, fmtNum, type OrderStatus } from "@/lib/mock-data";
 import { useStore } from "@/lib/store";
 import { Plus, Download } from "lucide-react";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogDescription,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +23,12 @@ export const Route = createFileRoute("/orders")({
 });
 
 const ALL_STATUSES: (OrderStatus | "all")[] = [
-  "all", "draft", "confirmed", "in_production", "ready", "dispatched",
+  "all",
+  "draft",
+  "confirmed",
+  "in_production",
+  "ready",
+  "dispatched",
 ];
 const STATUS_LABEL: Record<string, string> = {
   all: "All",
@@ -42,19 +53,36 @@ function OrdersPage() {
   const [dueDate, setDueDate] = useState("");
 
   const resetForm = () => {
-    setCustomer(""); setCountry(""); setArticle("");
-    setQty(""); setValue(""); setDueDate("");
+    setCustomer("");
+    setCountry("");
+    setArticle("");
+    setQty("");
+    setValue("");
+    setDueDate("");
   };
 
-  const visible = filterStatus === "all"
-    ? orders
-    : orders.filter((o) => o.status === filterStatus);
+  const visible = filterStatus === "all" ? orders : orders.filter((o) => o.status === filterStatus);
 
   const exportCSV = () => {
-    const header = ["Order #", "Customer", "Country", "Article", "Qty (pcs)", "Value (BDT)", "Due date", "Status"];
+    const header = [
+      "Order #",
+      "Customer",
+      "Country",
+      "Article",
+      "Qty (pcs)",
+      "Value (BDT)",
+      "Due date",
+      "Status",
+    ];
     const rows = visible.map((o) => [
-      o.order_no, o.customer, o.country, o.article,
-      o.qty_pcs, o.value_bdt, o.due_date, o.status,
+      o.order_no,
+      o.customer,
+      o.country,
+      o.article,
+      o.qty_pcs,
+      o.value_bdt,
+      o.due_date,
+      o.status,
     ]);
     const csv = [header, ...rows].map((r) => r.join(",")).join("\n");
     const a = document.createElement("a");
@@ -97,7 +125,13 @@ function OrdersPage() {
           >
             <Download className="h-3.5 w-3.5" /> Export
           </button>
-          <Dialog open={newOpen} onOpenChange={(o) => { setNewOpen(o); if (!o) resetForm(); }}>
+          <Dialog
+            open={newOpen}
+            onOpenChange={(o) => {
+              setNewOpen(o);
+              if (!o) resetForm();
+            }}
+          >
             <DialogTrigger asChild>
               <button className="inline-flex items-center gap-1.5 bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90">
                 <Plus className="h-3.5 w-3.5" /> New order
@@ -112,32 +146,79 @@ function OrdersPage() {
               </DialogHeader>
               <form onSubmit={submitNewOrder} className="grid grid-cols-2 gap-3 pt-2">
                 <div className="col-span-2 space-y-1.5">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Customer name</Label>
-                  <Input value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Milano Pelle SRL" />
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Customer name
+                  </Label>
+                  <Input
+                    value={customer}
+                    onChange={(e) => setCustomer(e.target.value)}
+                    placeholder="Milano Pelle SRL"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Country</Label>
-                  <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Italy" />
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Country
+                  </Label>
+                  <Input
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                    placeholder="Italy"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Article code</Label>
-                  <Input value={article} onChange={(e) => setArticle(e.target.value)} placeholder="COW-CR-1.2-BLK" />
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Article code
+                  </Label>
+                  <Input
+                    value={article}
+                    onChange={(e) => setArticle(e.target.value)}
+                    placeholder="COW-CR-1.2-BLK"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Qty (pcs)</Label>
-                  <Input type="number" min={1} value={qty} onChange={(e) => setQty(e.target.value)} placeholder="1200" />
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Qty (pcs)
+                  </Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={qty}
+                    onChange={(e) => setQty(e.target.value)}
+                    placeholder="1200"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Value (BDT)</Label>
-                  <Input type="number" min={0} value={value} onChange={(e) => setValue(e.target.value)} placeholder="18400000" />
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Value (BDT)
+                  </Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={value}
+                    onChange={(e) => setValue(e.target.value)}
+                    placeholder="18400000"
+                  />
                 </div>
                 <div className="col-span-2 space-y-1.5">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Due date</Label>
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Due date
+                  </Label>
                   <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
                 </div>
                 <DialogFooter className="col-span-2 mt-2">
-                  <button type="button" onClick={() => setNewOpen(false)} className="border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted">Cancel</button>
-                  <button type="submit" className="bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90">Create order</button>
+                  <button
+                    type="button"
+                    onClick={() => setNewOpen(false)}
+                    className="border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
+                  >
+                    Create order
+                  </button>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -192,17 +273,25 @@ function OrdersPage() {
               visible.map((o) => (
                 <tr key={o.id} className="border-t border-border hover:bg-muted/30 cursor-pointer">
                   <td className="px-4 py-2.5 font-mono text-xs">
-                    <Link to="/orders/$orderId" params={{ orderId: o.order_no }} className="text-accent-foreground underline-offset-2 hover:underline">
+                    <Link
+                      to="/orders/$orderId"
+                      params={{ orderId: o.order_no }}
+                      className="text-accent-foreground underline-offset-2 hover:underline"
+                    >
                       {o.order_no}
                     </Link>
                   </td>
                   <td className="px-4 py-2.5">{o.customer}</td>
                   <td className="px-4 py-2.5 text-muted-foreground">{o.country}</td>
-                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{o.article}</td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">
+                    {o.article}
+                  </td>
                   <td className="px-4 py-2.5 text-right">{fmtNum(o.qty_pcs)}</td>
                   <td className="px-4 py-2.5 text-right">{fmtBDT(o.value_bdt)}</td>
                   <td className="px-4 py-2.5 text-xs">{o.due_date}</td>
-                  <td className="px-4 py-2.5"><StatusPill status={o.status} /></td>
+                  <td className="px-4 py-2.5">
+                    <StatusPill status={o.status} />
+                  </td>
                 </tr>
               ))
             )}

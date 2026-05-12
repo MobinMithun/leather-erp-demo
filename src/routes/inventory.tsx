@@ -4,17 +4,31 @@ import { PageShell, StatCard } from "@/components/page-shell";
 import { fmtBDT, fmtNum, type StockMove } from "@/lib/mock-data";
 import { useStore } from "@/lib/store";
 import {
-  ArrowDownToLine, ArrowUpFromLine, ArrowLeftRight, SlidersHorizontal,
-  Plus, Search, ArrowRight,
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  ArrowLeftRight,
+  SlidersHorizontal,
+  Plus,
+  Search,
+  ArrowRight,
 } from "lucide-react";
 import { StockMoveDialog } from "@/components/stock-move-dialog";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
 
@@ -23,7 +37,15 @@ export const Route = createFileRoute("/inventory")({
   component: InventoryPage,
 });
 
-const CHEM_TYPES = ["Tanning", "Liming", "Pickling", "Fatliquoring", "Dyeing", "Retanning", "Other"];
+const CHEM_TYPES = [
+  "Tanning",
+  "Liming",
+  "Pickling",
+  "Fatliquoring",
+  "Dyeing",
+  "Retanning",
+  "Other",
+];
 const MOVE_TYPES: (StockMove["type"] | "all")[] = ["all", "IN", "OUT", "TRANSFER", "ADJUST"];
 
 const CHEM_TYPE_COLORS: Record<string, string> = {
@@ -74,7 +96,12 @@ function InventoryPage() {
   };
 
   const resetSkinForm = () => {
-    setSkinLot(""); setSkinSpecies("cow"); setSkinOrigin(""); setSkinCount(""); setSkinKg(""); setSkinCost("");
+    setSkinLot("");
+    setSkinSpecies("cow");
+    setSkinOrigin("");
+    setSkinCount("");
+    setSkinKg("");
+    setSkinCost("");
     setSkinDate(new Date().toISOString().slice(0, 10));
   };
 
@@ -117,8 +144,13 @@ function InventoryPage() {
   };
 
   const resetChemForm = () => {
-    setChemName(""); setChemType("Tanning"); setChemLot(""); setChemSupplier("");
-    setChemQty(""); setChemReorder(""); setChemCost("");
+    setChemName("");
+    setChemType("Tanning");
+    setChemLot("");
+    setChemSupplier("");
+    setChemQty("");
+    setChemReorder("");
+    setChemCost("");
     setChemDate(new Date().toISOString().slice(0, 10));
   };
 
@@ -158,24 +190,21 @@ function InventoryPage() {
     ? rawSkins.filter(
         (r) =>
           r.lot_no.toLowerCase().includes(skinSearch.toLowerCase()) ||
-          r.origin.toLowerCase().includes(skinSearch.toLowerCase())
+          r.origin.toLowerCase().includes(skinSearch.toLowerCase()),
       )
     : rawSkins;
 
-  const visibleChems = chemFilter === "all"
-    ? chemicals
-    : chemicals.filter((c) => c.type === chemFilter);
+  const visibleChems =
+    chemFilter === "all" ? chemicals : chemicals.filter((c) => c.type === chemFilter);
 
-  const visibleMoves = (moveFilter === "all"
-    ? stockMoves
-    : stockMoves.filter((m) => m.type === moveFilter)
+  const visibleMoves = (
+    moveFilter === "all" ? stockMoves : stockMoves.filter((m) => m.type === moveFilter)
   ).slice(0, 100);
 
   const moveCountByType = (t: StockMove["type"]) => stockMoves.filter((m) => m.type === t).length;
 
   return (
     <PageShell title="Inventory" subtitle="Raw skins · chemicals · stock ledger">
-
       {/* ── KPI cards ────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard
@@ -269,42 +298,56 @@ function InventoryPage() {
                 {visibleSkins.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-xs text-muted-foreground">
-                      {skinSearch ? "No lots match your search." : `No raw skin lots yet. Click "Receive skins" to add one.`}
+                      {skinSearch
+                        ? "No lots match your search."
+                        : `No raw skin lots yet. Click "Receive skins" to add one.`}
                     </td>
                   </tr>
-                ) : visibleSkins.map((r) => (
-                  <tr key={r.id} className="border-t border-border hover:bg-muted/30">
-                    <td className="px-4 py-3">
-                      <div className="font-mono text-xs font-medium">{r.lot_no}</div>
-                      <div className="text-[10px] text-muted-foreground">{r.received}</div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
-                        r.species === "cow"
-                          ? "bg-status-info/15 text-status-info"
-                          : "bg-status-ok/15 text-status-ok"
-                      }`}>
-                        {r.species}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm">{r.origin}</td>
-                    <td className="px-4 py-3 text-right font-medium tabular">{fmtNum(r.pieces)}</td>
-                    <td className="px-4 py-3 text-right tabular text-muted-foreground">
-                      {r.pieces > 0 ? (r.total_kg / r.pieces).toFixed(1) : "—"} kg
-                    </td>
-                    <td className="px-4 py-3 text-right font-medium tabular text-accent-foreground">
-                      {fmtBDT(r.unit_cost_bdt * r.pieces)}
-                    </td>
-                  </tr>
-                ))}
+                ) : (
+                  visibleSkins.map((r) => (
+                    <tr key={r.id} className="border-t border-border hover:bg-muted/30">
+                      <td className="px-4 py-3">
+                        <div className="font-mono text-xs font-medium">{r.lot_no}</div>
+                        <div className="text-[10px] text-muted-foreground">{r.received}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
+                            r.species === "cow"
+                              ? "bg-status-info/15 text-status-info"
+                              : "bg-status-ok/15 text-status-ok"
+                          }`}
+                        >
+                          {r.species}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm">{r.origin}</td>
+                      <td className="px-4 py-3 text-right font-medium tabular">
+                        {fmtNum(r.pieces)}
+                      </td>
+                      <td className="px-4 py-3 text-right tabular text-muted-foreground">
+                        {r.pieces > 0 ? (r.total_kg / r.pieces).toFixed(1) : "—"} kg
+                      </td>
+                      <td className="px-4 py-3 text-right font-medium tabular text-accent-foreground">
+                        {fmtBDT(r.unit_cost_bdt * r.pieces)}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
               {visibleSkins.length > 0 && (
                 <tfoot className="border-t-2 border-border bg-muted/30 text-[10px] uppercase tracking-wider text-muted-foreground">
                   <tr>
-                    <td className="px-4 py-2 font-medium" colSpan={3}>Total</td>
-                    <td className="px-4 py-2 text-right font-medium text-foreground tabular">{fmtNum(totalRawPcs)}</td>
+                    <td className="px-4 py-2 font-medium" colSpan={3}>
+                      Total
+                    </td>
+                    <td className="px-4 py-2 text-right font-medium text-foreground tabular">
+                      {fmtNum(totalRawPcs)}
+                    </td>
                     <td className="px-4 py-2" />
-                    <td className="px-4 py-2 text-right font-medium text-foreground tabular">{fmtBDT(totalRawValue)}</td>
+                    <td className="px-4 py-2 text-right font-medium text-foreground tabular">
+                      {fmtBDT(totalRawValue)}
+                    </td>
                   </tr>
                 </tfoot>
               )}
@@ -361,60 +404,77 @@ function InventoryPage() {
                 {visibleChems.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-xs text-muted-foreground">
-                      {chemFilter !== "all" ? `No ${chemFilter} lots.` : `No chemical lots yet. Click "Receive chemicals" to add one.`}
+                      {chemFilter !== "all"
+                        ? `No ${chemFilter} lots.`
+                        : `No chemical lots yet. Click "Receive chemicals" to add one.`}
                     </td>
                   </tr>
-                ) : visibleChems.map((c) => {
-                  const pct = Math.min(110, (c.qty_kg / c.reorder_kg) * 100);
-                  const low = c.qty_kg < c.reorder_kg;
-                  const critical = c.qty_kg < c.reorder_kg * 0.5;
-                  const barColor = !low ? "bg-status-ok" : critical ? "bg-status-bad" : "bg-status-warn";
-                  return (
-                    <tr key={c.id} className="border-t border-border hover:bg-muted/30">
-                      <td className="px-4 py-3">
-                        <div className="text-sm font-medium">{c.chemical}</div>
-                        <div className="text-[10px] text-muted-foreground font-mono">
-                          {c.lot_no} · {c.supplier}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${CHEM_TYPE_COLORS[c.type] ?? "bg-muted text-muted-foreground"}`}>
-                          {c.type}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right font-medium tabular">{fmtNum(c.qty_kg)}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="h-2 flex-1 bg-muted rounded-sm overflow-hidden">
-                            <div className={`h-full ${barColor} rounded-sm`} style={{ width: `${Math.min(100, pct)}%` }} />
+                ) : (
+                  visibleChems.map((c) => {
+                    const pct = Math.min(110, (c.qty_kg / c.reorder_kg) * 100);
+                    const low = c.qty_kg < c.reorder_kg;
+                    const critical = c.qty_kg < c.reorder_kg * 0.5;
+                    const barColor = !low
+                      ? "bg-status-ok"
+                      : critical
+                        ? "bg-status-bad"
+                        : "bg-status-warn";
+                    return (
+                      <tr key={c.id} className="border-t border-border hover:bg-muted/30">
+                        <td className="px-4 py-3">
+                          <div className="text-sm font-medium">{c.chemical}</div>
+                          <div className="text-[10px] text-muted-foreground font-mono">
+                            {c.lot_no} · {c.supplier}
                           </div>
-                          <span className="text-[10px] text-muted-foreground tabular w-20 text-right shrink-0">
-                            {fmtNum(c.qty_kg)} / {fmtNum(c.reorder_kg)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${CHEM_TYPE_COLORS[c.type] ?? "bg-muted text-muted-foreground"}`}
+                          >
+                            {c.type}
                           </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-right tabular text-accent-foreground font-medium">
-                        {fmtBDT(c.qty_kg * c.unit_cost_bdt)}
-                      </td>
-                      <td className="px-4 py-3">
-                        {low ? (
-                          <span className="inline-flex items-center rounded-sm bg-status-bad/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-status-bad">
-                            Reorder
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center rounded-sm bg-status-ok/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-status-ok">
-                            OK
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+                        </td>
+                        <td className="px-4 py-3 text-right font-medium tabular">
+                          {fmtNum(c.qty_kg)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 flex-1 bg-muted rounded-sm overflow-hidden">
+                              <div
+                                className={`h-full ${barColor} rounded-sm`}
+                                style={{ width: `${Math.min(100, pct)}%` }}
+                              />
+                            </div>
+                            <span className="text-[10px] text-muted-foreground tabular w-20 text-right shrink-0">
+                              {fmtNum(c.qty_kg)} / {fmtNum(c.reorder_kg)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-right tabular text-accent-foreground font-medium">
+                          {fmtBDT(c.qty_kg * c.unit_cost_bdt)}
+                        </td>
+                        <td className="px-4 py-3">
+                          {low ? (
+                            <span className="inline-flex items-center rounded-sm bg-status-bad/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-status-bad">
+                              Reorder
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center rounded-sm bg-status-ok/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-status-ok">
+                              OK
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
               {visibleChems.length > 0 && (
                 <tfoot className="border-t-2 border-border bg-muted/30 text-[10px] uppercase tracking-wider text-muted-foreground">
                   <tr>
-                    <td className="px-4 py-2 font-medium" colSpan={4}>Total ({visibleChems.length} lots)</td>
+                    <td className="px-4 py-2 font-medium" colSpan={4}>
+                      Total ({visibleChems.length} lots)
+                    </td>
                     <td className="px-4 py-2 text-right font-medium text-foreground tabular">
                       {fmtBDT(visibleChems.reduce((s, c) => s + c.qty_kg * c.unit_cost_bdt, 0))}
                     </td>
@@ -435,11 +495,15 @@ function InventoryPage() {
               {MOVE_TYPES.map((t) => {
                 const count = t === "all" ? stockMoves.length : moveCountByType(t);
                 const toneClass =
-                  t === "IN" ? "border-status-ok/40 bg-status-ok/5 text-status-ok"
-                    : t === "OUT" ? "border-status-bad/40 bg-status-bad/5 text-status-bad"
-                    : t === "TRANSFER" ? "border-status-info/40 bg-status-info/5 text-status-info"
-                    : t === "ADJUST" ? "border-status-warn/40 bg-status-warn/5 text-status-warn"
-                    : "";
+                  t === "IN"
+                    ? "border-status-ok/40 bg-status-ok/5 text-status-ok"
+                    : t === "OUT"
+                      ? "border-status-bad/40 bg-status-bad/5 text-status-bad"
+                      : t === "TRANSFER"
+                        ? "border-status-info/40 bg-status-info/5 text-status-info"
+                        : t === "ADJUST"
+                          ? "border-status-warn/40 bg-status-warn/5 text-status-warn"
+                          : "";
                 return (
                   <button
                     key={t}
@@ -481,57 +545,88 @@ function InventoryPage() {
                       No stock moves yet.
                     </td>
                   </tr>
-                ) : visibleMoves.map((m: StockMove) => {
-                  const tone =
-                    m.type === "IN" ? "text-status-ok"
-                      : m.type === "OUT" ? "text-status-bad"
-                      : m.type === "TRANSFER" ? "text-status-info"
-                      : "text-status-warn";
-                  const Icon =
-                    m.type === "IN" ? ArrowDownToLine
-                      : m.type === "OUT" ? ArrowUpFromLine
-                      : m.type === "TRANSFER" ? ArrowLeftRight
-                      : SlidersHorizontal;
-                  return (
-                    <tr key={m.id} className="border-t border-border hover:bg-muted/30">
-                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground whitespace-nowrap">{m.ts}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider ${tone}`}>
-                          <Icon className="h-3 w-3" /> {m.type}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="text-sm">{m.item}</div>
-                        <div className="text-[10px] font-mono text-muted-foreground">{m.lot_no}</div>
-                      </td>
-                      <td className={`px-4 py-3 text-right font-medium tabular whitespace-nowrap ${m.qty < 0 ? "text-status-bad" : "text-status-ok"}`}>
-                        {m.qty > 0 ? "+" : ""}{fmtNum(m.qty)} {m.unit}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                          <span>{m.from}</span>
-                          <ArrowRight className="h-3 w-3 shrink-0" />
-                          <span className="text-foreground">{m.to}</span>
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{m.ref}</td>
-                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{m.user}</td>
-                    </tr>
-                  );
-                })}
+                ) : (
+                  visibleMoves.map((m: StockMove) => {
+                    const tone =
+                      m.type === "IN"
+                        ? "text-status-ok"
+                        : m.type === "OUT"
+                          ? "text-status-bad"
+                          : m.type === "TRANSFER"
+                            ? "text-status-info"
+                            : "text-status-warn";
+                    const Icon =
+                      m.type === "IN"
+                        ? ArrowDownToLine
+                        : m.type === "OUT"
+                          ? ArrowUpFromLine
+                          : m.type === "TRANSFER"
+                            ? ArrowLeftRight
+                            : SlidersHorizontal;
+                    return (
+                      <tr key={m.id} className="border-t border-border hover:bg-muted/30">
+                        <td className="px-4 py-3 font-mono text-xs text-muted-foreground whitespace-nowrap">
+                          {m.ts}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider ${tone}`}
+                          >
+                            <Icon className="h-3 w-3" /> {m.type}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="text-sm">{m.item}</div>
+                          <div className="text-[10px] font-mono text-muted-foreground">
+                            {m.lot_no}
+                          </div>
+                        </td>
+                        <td
+                          className={`px-4 py-3 text-right font-medium tabular whitespace-nowrap ${m.qty < 0 ? "text-status-bad" : "text-status-ok"}`}
+                        >
+                          {m.qty > 0 ? "+" : ""}
+                          {fmtNum(m.qty)} {m.unit}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                            <span>{m.from}</span>
+                            <ArrowRight className="h-3 w-3 shrink-0" />
+                            <span className="text-foreground">{m.to}</span>
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                          {m.ref}
+                        </td>
+                        <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                          {m.user}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
           {visibleMoves.length === 100 && (
             <p className="mt-2 text-center text-[10px] text-muted-foreground">
-              Showing first 100 of {moveFilter === "all" ? stockMoves.length : stockMoves.filter((m) => m.type === moveFilter).length} moves.
+              Showing first 100 of{" "}
+              {moveFilter === "all"
+                ? stockMoves.length
+                : stockMoves.filter((m) => m.type === moveFilter).length}{" "}
+              moves.
             </p>
           )}
         </section>
       )}
 
       {/* ── Receive raw skins dialog ──────────────────────────────── */}
-      <Dialog open={skinOpen} onOpenChange={(o) => { setSkinOpen(o); if (!o) resetSkinForm(); }}>
+      <Dialog
+        open={skinOpen}
+        onOpenChange={(o) => {
+          setSkinOpen(o);
+          if (!o) resetSkinForm();
+        }}
+      >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Receive raw skins</DialogTitle>
@@ -542,14 +637,29 @@ function InventoryPage() {
           <form onSubmit={submitSkin} className="grid grid-cols-2 gap-3 pt-2">
             <div className="space-y-1.5">
               <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Lot # <span className="ml-1 normal-case text-muted-foreground/70">(auto-generated · editable)</span>
+                Lot #{" "}
+                <span className="ml-1 normal-case text-muted-foreground/70">
+                  (auto-generated · editable)
+                </span>
               </Label>
-              <Input value={skinLot} onChange={(e) => setSkinLot(e.target.value)} className="font-mono" maxLength={40} />
+              <Input
+                value={skinLot}
+                onChange={(e) => setSkinLot(e.target.value)}
+                className="font-mono"
+                maxLength={40}
+              />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Species</Label>
-              <Select value={skinSpecies} onValueChange={(v) => setSkinSpecies(v as "cow" | "goat")}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Species
+              </Label>
+              <Select
+                value={skinSpecies}
+                onValueChange={(v) => setSkinSpecies(v as "cow" | "goat")}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="cow">Cow</SelectItem>
                   <SelectItem value="goat">Goat</SelectItem>
@@ -557,35 +667,85 @@ function InventoryPage() {
               </Select>
             </div>
             <div className="col-span-2 space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Origin / District</Label>
-              <Input value={skinOrigin} onChange={(e) => setSkinOrigin(e.target.value)} placeholder="Sirajganj" maxLength={60} />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Origin / District
+              </Label>
+              <Input
+                value={skinOrigin}
+                onChange={(e) => setSkinOrigin(e.target.value)}
+                placeholder="Sirajganj"
+                maxLength={60}
+              />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Count (pcs)</Label>
-              <Input type="number" min={1} value={skinCount} onChange={(e) => setSkinCount(e.target.value)} placeholder="720" />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Count (pcs)
+              </Label>
+              <Input
+                type="number"
+                min={1}
+                value={skinCount}
+                onChange={(e) => setSkinCount(e.target.value)}
+                placeholder="720"
+              />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Total weight (kg)</Label>
-              <Input type="number" min={1} value={skinKg} onChange={(e) => setSkinKg(e.target.value)} placeholder="2880" />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Total weight (kg)
+              </Label>
+              <Input
+                type="number"
+                min={1}
+                value={skinKg}
+                onChange={(e) => setSkinKg(e.target.value)}
+                placeholder="2880"
+              />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Unit cost (BDT / pc)</Label>
-              <Input type="number" min={0} value={skinCost} onChange={(e) => setSkinCost(e.target.value)} placeholder="610" />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Unit cost (BDT / pc)
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                value={skinCost}
+                onChange={(e) => setSkinCost(e.target.value)}
+                placeholder="610"
+              />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Received date</Label>
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Received date
+              </Label>
               <Input type="date" value={skinDate} onChange={(e) => setSkinDate(e.target.value)} />
             </div>
             <DialogFooter className="col-span-2 mt-2">
-              <button type="button" onClick={() => setSkinOpen(false)} className="border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted">Cancel</button>
-              <button type="submit" className="bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90">Receive lot</button>
+              <button
+                type="button"
+                onClick={() => setSkinOpen(false)}
+                className="border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
+              >
+                Receive lot
+              </button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
       {/* ── Receive chemicals dialog ──────────────────────────────── */}
-      <Dialog open={chemOpen} onOpenChange={(o) => { setChemOpen(o); if (!o) resetChemForm(); }}>
+      <Dialog
+        open={chemOpen}
+        onOpenChange={(o) => {
+          setChemOpen(o);
+          if (!o) resetChemForm();
+        }}
+      >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Receive chemicals</DialogTitle>
@@ -595,52 +755,118 @@ function InventoryPage() {
           </DialogHeader>
           <form onSubmit={submitChem} className="grid grid-cols-2 gap-3 pt-2">
             <div className="col-span-2 space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Chemical name</Label>
-              <Input value={chemName} onChange={(e) => setChemName(e.target.value)} placeholder="Chrome Sulphate 33%" maxLength={80} />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Chemical name
+              </Label>
+              <Input
+                value={chemName}
+                onChange={(e) => setChemName(e.target.value)}
+                placeholder="Chrome Sulphate 33%"
+                maxLength={80}
+              />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Type</Label>
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Type
+              </Label>
               <Select value={chemType} onValueChange={setChemType}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  {CHEM_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  {CHEM_TYPES.map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
               <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Lot # <span className="ml-1 normal-case text-muted-foreground/70">(auto-generated · editable)</span>
+                Lot #{" "}
+                <span className="ml-1 normal-case text-muted-foreground/70">
+                  (auto-generated · editable)
+                </span>
               </Label>
-              <Input value={chemLot} onChange={(e) => setChemLot(e.target.value)} className="font-mono" maxLength={40} />
+              <Input
+                value={chemLot}
+                onChange={(e) => setChemLot(e.target.value)}
+                className="font-mono"
+                maxLength={40}
+              />
             </div>
             <div className="col-span-2 space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Supplier</Label>
-              <Input value={chemSupplier} onChange={(e) => setChemSupplier(e.target.value)} placeholder="Stahl Asia" maxLength={80} />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Supplier
+              </Label>
+              <Input
+                value={chemSupplier}
+                onChange={(e) => setChemSupplier(e.target.value)}
+                placeholder="Stahl Asia"
+                maxLength={80}
+              />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Qty received (kg)</Label>
-              <Input type="number" min={0} value={chemQty} onChange={(e) => setChemQty(e.target.value)} placeholder="2000" />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Qty received (kg)
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                value={chemQty}
+                onChange={(e) => setChemQty(e.target.value)}
+                placeholder="2000"
+              />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Reorder point (kg)</Label>
-              <Input type="number" min={0} value={chemReorder} onChange={(e) => setChemReorder(e.target.value)} placeholder="1000" />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Reorder point (kg)
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                value={chemReorder}
+                onChange={(e) => setChemReorder(e.target.value)}
+                placeholder="1000"
+              />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Unit cost (BDT / kg)</Label>
-              <Input type="number" min={0} value={chemCost} onChange={(e) => setChemCost(e.target.value)} placeholder="185" />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Unit cost (BDT / kg)
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                value={chemCost}
+                onChange={(e) => setChemCost(e.target.value)}
+                placeholder="185"
+              />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Received date</Label>
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Received date
+              </Label>
               <Input type="date" value={chemDate} onChange={(e) => setChemDate(e.target.value)} />
             </div>
             <DialogFooter className="col-span-2 mt-2">
-              <button type="button" onClick={() => setChemOpen(false)} className="border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted">Cancel</button>
-              <button type="submit" className="bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90">Receive lot</button>
+              <button
+                type="button"
+                onClick={() => setChemOpen(false)}
+                className="border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
+              >
+                Receive lot
+              </button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
-
     </PageShell>
   );
 }

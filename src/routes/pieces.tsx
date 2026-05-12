@@ -5,12 +5,21 @@ import { useStore } from "@/lib/store";
 import { type PieceRow } from "@/lib/mock-data";
 import { Search, Pencil } from "lucide-react";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
 
@@ -34,7 +43,7 @@ function PiecesPage() {
     ? pieces.filter(
         (p) =>
           p.piece_no.toLowerCase().includes(search.toLowerCase()) ||
-          p.batch_no.toLowerCase().includes(search.toLowerCase())
+          p.batch_no.toLowerCase().includes(search.toLowerCase()),
       )
     : pieces;
 
@@ -81,11 +90,15 @@ function PiecesPage() {
     >
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="border border-border bg-card p-4">
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Pieces tracked</div>
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            Pieces tracked
+          </div>
           <div className="mt-1 text-2xl font-semibold tabular">{visible.length}</div>
         </div>
         <div className="border border-border bg-card p-4">
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Total sq ft</div>
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            Total sq ft
+          </div>
           <div className="mt-1 text-2xl font-semibold tabular">{totalSqft.toFixed(1)}</div>
         </div>
         <div className="border border-border bg-card p-4">
@@ -93,7 +106,9 @@ function PiecesPage() {
           <div className="mt-1 text-2xl font-semibold tabular text-status-ok">{aGrade}</div>
         </div>
         <div className="border border-border bg-card p-4">
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Avg thickness</div>
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            Avg thickness
+          </div>
           <div className="mt-1 text-2xl font-semibold tabular">
             {visible.length > 0
               ? (visible.reduce((s, p) => s + p.thickness_mm, 0) / visible.length).toFixed(2)
@@ -130,14 +145,20 @@ function PiecesPage() {
               visible.map((p) => (
                 <tr key={p.id} className="border-t border-border hover:bg-muted/30">
                   <td className="px-4 py-2 font-mono text-xs">{p.piece_no}</td>
-                  <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{p.batch_no}</td>
+                  <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
+                    {p.batch_no}
+                  </td>
                   <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{p.article}</td>
                   <td className="px-4 py-2 text-xs uppercase">{p.layer}</td>
                   <td className="px-4 py-2 text-right">{p.sqft.toFixed(1)}</td>
                   <td className="px-4 py-2 text-right">{p.thickness_mm.toFixed(2)}</td>
-                  <td className="px-4 py-2"><StatusPill status={p.stage} /></td>
+                  <td className="px-4 py-2">
+                    <StatusPill status={p.stage} />
+                  </td>
                   <td className="px-4 py-2 text-xs text-muted-foreground">{p.defect ?? "—"}</td>
-                  <td className="px-4 py-2"><StatusPill status={p.grade} /></td>
+                  <td className="px-4 py-2">
+                    <StatusPill status={p.grade} />
+                  </td>
                   <td className="px-4 py-2">
                     <button
                       onClick={() => openGrade(p)}
@@ -154,7 +175,12 @@ function PiecesPage() {
       </div>
 
       {/* Grade dialog */}
-      <Dialog open={!!gradeTarget} onOpenChange={(o) => { if (!o) setGradeTarget(null); }}>
+      <Dialog
+        open={!!gradeTarget}
+        onOpenChange={(o) => {
+          if (!o) setGradeTarget(null);
+        }}
+      >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Grade piece</DialogTitle>
@@ -164,7 +190,9 @@ function PiecesPage() {
           </DialogHeader>
           <form onSubmit={submitGrade} className="grid grid-cols-2 gap-3 pt-2">
             <div className="col-span-2 space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Grade</Label>
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Grade
+              </Label>
               <div className="flex gap-2">
                 {GRADES.map((g) => (
                   <button
@@ -173,10 +201,13 @@ function PiecesPage() {
                     onClick={() => setGradeVal(g)}
                     className={`flex-1 border px-2 py-1.5 text-xs font-medium uppercase ${
                       gradeVal === g
-                        ? g === "A" ? "border-status-ok bg-status-ok/10 text-status-ok"
-                          : g === "B" ? "border-status-info bg-status-info/10 text-status-info"
-                          : g === "C" ? "border-status-warn bg-status-warn/10 text-status-warn"
-                          : "border-status-bad bg-status-bad/10 text-status-bad"
+                        ? g === "A"
+                          ? "border-status-ok bg-status-ok/10 text-status-ok"
+                          : g === "B"
+                            ? "border-status-info bg-status-info/10 text-status-info"
+                            : g === "C"
+                              ? "border-status-warn bg-status-warn/10 text-status-warn"
+                              : "border-status-bad bg-status-bad/10 text-status-bad"
                         : "border-border bg-background text-muted-foreground hover:bg-muted"
                     }`}
                   >
@@ -186,20 +217,56 @@ function PiecesPage() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Sq ft</Label>
-              <Input type="number" step="0.1" min={0} value={sqft} onChange={(e) => setSqft(e.target.value)} placeholder="22.5" />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Sq ft
+              </Label>
+              <Input
+                type="number"
+                step="0.1"
+                min={0}
+                value={sqft}
+                onChange={(e) => setSqft(e.target.value)}
+                placeholder="22.5"
+              />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Thickness (mm)</Label>
-              <Input type="number" step="0.01" min={0} value={thickness} onChange={(e) => setThickness(e.target.value)} placeholder="1.20" />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Thickness (mm)
+              </Label>
+              <Input
+                type="number"
+                step="0.01"
+                min={0}
+                value={thickness}
+                onChange={(e) => setThickness(e.target.value)}
+                placeholder="1.20"
+              />
             </div>
             <div className="col-span-2 space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Defect notes</Label>
-              <Input value={defect} onChange={(e) => setDefect(e.target.value)} placeholder="scratch, stain, etc." maxLength={120} />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Defect notes
+              </Label>
+              <Input
+                value={defect}
+                onChange={(e) => setDefect(e.target.value)}
+                placeholder="scratch, stain, etc."
+                maxLength={120}
+              />
             </div>
             <DialogFooter className="col-span-2 mt-1">
-              <button type="button" onClick={() => setGradeTarget(null)} className="border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted">Cancel</button>
-              <button type="submit" className="bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90">Save grade</button>
+              <button
+                type="button"
+                onClick={() => setGradeTarget(null)}
+                className="border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
+              >
+                Save grade
+              </button>
             </DialogFooter>
           </form>
         </DialogContent>

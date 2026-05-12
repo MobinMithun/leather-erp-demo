@@ -5,12 +5,21 @@ import { fmtNum } from "@/lib/mock-data";
 import { useStore } from "@/lib/store";
 import { Plus } from "lucide-react";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
 
@@ -32,8 +41,14 @@ function QCPage() {
   const [rejects, setRejects] = useState("");
 
   const reset = () => {
-    setBatchNo(""); setArticle(""); setDate(new Date().toISOString().slice(0, 10));
-    setInspected(""); setGradeA(""); setGradeB(""); setGradeC(""); setRejects("");
+    setBatchNo("");
+    setArticle("");
+    setDate(new Date().toISOString().slice(0, 10));
+    setInspected("");
+    setGradeA("");
+    setGradeB("");
+    setGradeC("");
+    setRejects("");
   };
 
   const handleBatchSelect = (bn: string) => {
@@ -45,9 +60,8 @@ function QCPage() {
   const totalInspected = qcEntries.reduce((s, q) => s + q.inspected, 0);
   const totalA = qcEntries.reduce((s, q) => s + q.grade_a, 0);
   const totalRej = qcEntries.reduce((s, q) => s + q.rejects, 0);
-  const avgYield = qcEntries.length > 0
-    ? qcEntries.reduce((s, q) => s + q.yield_pct, 0) / qcEntries.length
-    : 0;
+  const avgYield =
+    qcEntries.length > 0 ? qcEntries.reduce((s, q) => s + q.yield_pct, 0) / qcEntries.length : 0;
 
   const submitQC = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +78,7 @@ function QCPage() {
       toast.error("Grade counts exceed inspected total");
       return;
     }
-    const yield_pct = +((((ins - r) / ins) * 100).toFixed(1));
+    const yield_pct = +(((ins - r) / ins) * 100).toFixed(1);
     addQCEntry({
       batch_no: batchNo,
       article: article || batchNo,
@@ -106,7 +120,9 @@ function QCPage() {
           label="Rejects"
           value={fmtNum(totalRej)}
           tone="bad"
-          sub={totalInspected > 0 ? `${((totalRej / totalInspected) * 100).toFixed(1)}%` : undefined}
+          sub={
+            totalInspected > 0 ? `${((totalRej / totalInspected) * 100).toFixed(1)}%` : undefined
+          }
         />
         <StatCard label="Avg yield" value={`${avgYield.toFixed(1)}%`} tone="ok" />
       </div>
@@ -143,7 +159,9 @@ function QCPage() {
                 return (
                   <tr key={i} className="border-t border-border hover:bg-muted/30">
                     <td className="px-4 py-2.5 font-mono text-xs">{q.batch_no}</td>
-                    <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{q.article}</td>
+                    <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">
+                      {q.article}
+                    </td>
                     <td className="px-4 py-2.5 text-xs">{q.date}</td>
                     <td className="px-4 py-2.5 text-right">{fmtNum(q.inspected)}</td>
                     <td className="px-4 py-2.5 text-right text-status-ok">{fmtNum(q.grade_a)}</td>
@@ -168,7 +186,13 @@ function QCPage() {
       </div>
 
       {/* Log QC dialog */}
-      <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
+      <Dialog
+        open={open}
+        onOpenChange={(o) => {
+          setOpen(o);
+          if (!o) reset();
+        }}
+      >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Log QC inspection</DialogTitle>
@@ -178,9 +202,13 @@ function QCPage() {
           </DialogHeader>
           <form onSubmit={submitQC} className="grid grid-cols-2 gap-3 pt-2">
             <div className="col-span-2 space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Batch</Label>
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Batch
+              </Label>
               <Select value={batchNo} onValueChange={handleBatchSelect}>
-                <SelectTrigger><SelectValue placeholder="Select batch" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select batch" />
+                </SelectTrigger>
                 <SelectContent>
                   {batches.map((b) => (
                     <SelectItem key={b.id} value={b.batch_no}>
@@ -191,32 +219,85 @@ function QCPage() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Date</Label>
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Date
+              </Label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Inspected (total)</Label>
-              <Input type="number" min={1} value={inspected} onChange={(e) => setInspected(e.target.value)} placeholder="800" />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Inspected (total)
+              </Label>
+              <Input
+                type="number"
+                min={1}
+                value={inspected}
+                onChange={(e) => setInspected(e.target.value)}
+                placeholder="800"
+              />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Grade A</Label>
-              <Input type="number" min={0} value={gradeA} onChange={(e) => setGradeA(e.target.value)} placeholder="510" />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Grade A
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                value={gradeA}
+                onChange={(e) => setGradeA(e.target.value)}
+                placeholder="510"
+              />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Grade B</Label>
-              <Input type="number" min={0} value={gradeB} onChange={(e) => setGradeB(e.target.value)} placeholder="200" />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Grade B
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                value={gradeB}
+                onChange={(e) => setGradeB(e.target.value)}
+                placeholder="200"
+              />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Grade C</Label>
-              <Input type="number" min={0} value={gradeC} onChange={(e) => setGradeC(e.target.value)} placeholder="70" />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Grade C
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                value={gradeC}
+                onChange={(e) => setGradeC(e.target.value)}
+                placeholder="70"
+              />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Rejects</Label>
-              <Input type="number" min={0} value={rejects} onChange={(e) => setRejects(e.target.value)} placeholder="20" />
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Rejects
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                value={rejects}
+                onChange={(e) => setRejects(e.target.value)}
+                placeholder="20"
+              />
             </div>
             <DialogFooter className="col-span-2 mt-2">
-              <button type="button" onClick={() => setOpen(false)} className="border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted">Cancel</button>
-              <button type="submit" className="bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90">Log inspection</button>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
+              >
+                Log inspection
+              </button>
             </DialogFooter>
           </form>
         </DialogContent>

@@ -93,7 +93,9 @@ function OrderDetailPage() {
       </div>
 
       <div className="border border-border bg-card p-4">
-        <div className="mb-3 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Order timeline</div>
+        <div className="mb-3 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+          Order timeline
+        </div>
         <div className="flex items-center gap-2">
           {TIMELINE.map((t, i) => (
             <div key={t.key} className="flex flex-1 items-center gap-2">
@@ -106,7 +108,9 @@ function OrderDetailPage() {
               >
                 {i + 1}
               </div>
-              <div className={`flex-1 text-xs ${i === activeIdx ? "font-medium" : "text-muted-foreground"}`}>
+              <div
+                className={`flex-1 text-xs ${i === activeIdx ? "font-medium" : "text-muted-foreground"}`}
+              >
                 {t.label}
               </div>
               {i < TIMELINE.length - 1 && (
@@ -124,7 +128,10 @@ function OrderDetailPage() {
         {orderBatches.length === 0 ? (
           <div className="border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
             No batches allocated yet. Create one from the{" "}
-            <Link to="/batches" className="text-accent-foreground underline">Batches page</Link>.
+            <Link to="/batches" className="text-accent-foreground underline">
+              Batches page
+            </Link>
+            .
           </div>
         ) : (
           <div className="border border-border bg-card overflow-x-auto">
@@ -151,14 +158,20 @@ function OrderDetailPage() {
                       <td className="px-4 py-2.5 text-right">{fmtNum(b.raw_kg)}</td>
                       <td className="px-4 py-2.5 text-right">{b.pieces}</td>
                       <td className="px-4 py-2.5">{b.drum}</td>
-                      <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{b.recipe}</td>
-                      <td className="px-4 py-2.5"><StatusPill status={b.status} /></td>
+                      <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">
+                        {b.recipe}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <StatusPill status={b.status} />
+                      </td>
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-2">
                           <div className="h-1.5 flex-1 bg-muted">
                             <div className="h-full bg-accent" style={{ width: `${pct}%` }} />
                           </div>
-                          <span className="text-[10px] text-muted-foreground tabular w-8 text-right">{pct}%</span>
+                          <span className="text-[10px] text-muted-foreground tabular w-8 text-right">
+                            {pct}%
+                          </span>
                         </div>
                       </td>
                     </tr>
