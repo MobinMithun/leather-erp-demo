@@ -89,19 +89,27 @@ export function StockMoveDialog() {
     return [...chems, ...skins];
   }, [chemicals, rawSkins]);
 
-  const filteredItems = itemSearch.trim()
-    ? allItems.filter(
-        (i) =>
-          i.name.toLowerCase().includes(itemSearch.toLowerCase()) ||
-          i.lot_no.toLowerCase().includes(itemSearch.toLowerCase()),
-      )
-    : allItems;
+  const filteredItems = useMemo(
+    () =>
+      itemSearch.trim()
+        ? allItems.filter(
+            (i) =>
+              i.name.toLowerCase().includes(itemSearch.toLowerCase()) ||
+              i.lot_no.toLowerCase().includes(itemSearch.toLowerCase()),
+          )
+        : allItems,
+    [allItems, itemSearch],
+  );
 
   // Auto-suggest ref from recent active batches
-  const recentBatchRefs = batches
-    .filter((b) => b.status !== "done")
-    .slice(0, 6)
-    .map((b) => b.batch_no);
+  const recentBatchRefs = useMemo(
+    () =>
+      batches
+        .filter((b) => b.status !== "done")
+        .slice(0, 6)
+        .map((b) => b.batch_no),
+    [batches],
+  );
   const destinationValue = destination === "__custom__" ? customDest.trim() : destination;
   const qtyNumber = Number(qty);
   const inQtyNumber = Number(inQty);

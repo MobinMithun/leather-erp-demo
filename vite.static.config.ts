@@ -10,17 +10,6 @@ export default defineConfig({
       target: "react",
       autoCodeSplitting: true,
       generatedRouteTree: "./src/routeTree.gen.ts",
-      routeTreeFileFooter: [
-        `import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}`,
-      ],
     }),
     react(),
     tailwindcss(),
@@ -29,6 +18,26 @@ declare module '@tanstack/react-start' {
   build: {
     outDir: "dist/client",
     emptyOutDir: true,
+    target: "es2020",
+    sourcemap: false,
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom"],
+          "vendor-router": ["@tanstack/react-router", "@tanstack/react-query"],
+          "vendor-recharts": ["recharts"],
+          "vendor-radix": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-select",
+            "@radix-ui/react-tabs",
+            "@radix-ui/react-tooltip",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-accordion",
+          ],
+        },
+      },
+    },
   },
   resolve: {
     dedupe: ["react", "react-dom", "@tanstack/react-router"],

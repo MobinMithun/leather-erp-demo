@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  type ReactNode,
+} from "react";
 import {
   ORDERS as SEED_ORDERS,
   BATCHES as SEED_BATCHES,
@@ -197,18 +205,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setDB(loadDB());
   }, []);
 
-  const update = (fn: (prev: DB) => DB) => {
+  const update = useCallback((fn: (prev: DB) => DB) => {
     setDB((prev) => {
       const next = fn(prev);
       saveDB(next);
       return next;
     });
-  };
+  }, []);
 
-  const ctx: StoreCtx = {
-    ...db,
-
-    addOrder: (o) => {
+  const addOrder = useCallback(
+    (o: NewOrder): SalesOrder => {
       const order: SalesOrder = {
         id: `o-${Date.now()}`,
         order_no: genOrderNo(),
@@ -223,14 +229,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       update((prev) => ({ ...prev, orders: [...prev.orders, order] }));
       return order;
     },
+    [update],
+  );
 
-    updateOrderStatus: (id, status) =>
+  const updateOrderStatus = useCallback(
+    (id: string, status: OrderStatus) =>
       update((prev) => ({
         ...prev,
         orders: prev.orders.map((o) => (o.id === id ? { ...o, status } : o)),
       })),
+    [update],
+  );
 
-    addBatch: (b) => {
+  const addBatch = useCallback(
+    (b: NewBatch): Batch => {
       const batch: Batch = {
         id: `b-${Date.now()}`,
         batch_no: genBatchNo(),
@@ -249,9 +261,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       update((prev) => ({ ...prev, batches: [...prev.batches, batch] }));
       return batch;
     },
+    [update],
+  );
 
-    advanceBatchStage: (id) => {
-      let newStageName = "";
+  const advanceBatchStage = useCallback(
+    (id: string): string => {
+      let newStageName = "done";
       update((prev) => {
         const batches = prev.batches.map((b) => {
           if (b.id !== id) return b;
@@ -275,8 +290,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       });
       return newStageName;
     },
+    [update],
+  );
 
-    addStockMove: (m) => {
+  const addStockMove = useCallback(
+    (m: NewStockMove) => {
       const move: StockMove = {
         id: `m-${Date.now()}`,
         ts: nowStamp(),
@@ -299,43 +317,101 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return { ...prev, stockMoves: [move, ...prev.stockMoves], chemicals, rawSkins };
       });
     },
+    [update],
+  );
 
-    addChemicalLot: (lot) =>
+  const addChemicalLot = useCallback(
+    (lot: NewChemicalLot) =>
       update((prev) => ({
         ...prev,
         chemicals: [...prev.chemicals, { ...lot, id: `c-${Date.now()}` }],
       })),
+    [update],
+  );
 
-    addRawSkinLot: (lot) =>
+  const addRawSkinLot = useCallback(
+    (lot: NewRawSkinLot) =>
       update((prev) => ({
         ...prev,
         rawSkins: [...prev.rawSkins, { ...lot, id: `r-${Date.now()}` }],
       })),
+    [update],
+  );
 
-    addQCEntry: (q) => update((prev) => ({ ...prev, qcEntries: [q, ...prev.qcEntries] })),
+  const addQCEntry = useCallback(
+    (q: QCRow) => update((prev) => ({ ...prev, qcEntries: [q, ...prev.qcEntries] })),
+    [update],
+  );
 
-    addESGEntry: (e) => update((prev) => ({ ...prev, esgEntries: [...prev.esgEntries, e] })),
+  const addESGEntry = useCallback(
+    (e: ESGRow) => update((prev) => ({ ...prev, esgEntries: [...prev.esgEntries, e] })),
+    [update],
+  );
 
-    addRecipe: (r) =>
+  const addRecipe = useCallback(
+    (r: Omit<RecipeRow, "id">) =>
       update((prev) => ({
         ...prev,
         recipes: [...prev.recipes, { ...r, id: `r-${Date.now()}` }],
       })),
+    [update],
+  );
 
-    gradePiece: (id, grade, sqft, thickness_mm, defect) =>
+  const gradePiece = useCallback(
+    (
+      id: string,
+      grade: PieceRow["grade"],
+      sqft: number,
+      thickness_mm: number,
+      defect: string | null,
+    ) =>
       update((prev) => ({
         ...prev,
         pieces: prev.pieces.map((p) =>
           p.id === id ? { ...p, grade, sqft, thickness_mm, defect: defect || null } : p,
         ),
       })),
+    [update],
+  );
 
-    resetDB: () => {
-      const fresh = seedDB();
-      saveDB(fresh);
-      setDB(fresh);
-    },
-  };
+  const resetDB = useCallback(() => {
+    const fresh = seedDB();
+    saveDB(fresh);
+    setDB(fresh);
+  }, []);
+
+  const ctx = useMemo<StoreCtx>(
+    () => ({
+      ...db,
+      addOrder,
+      updateOrderStatus,
+      addBatch,
+      advanceBatchStage,
+      addStockMove,
+      addChemicalLot,
+      addRawSkinLot,
+      addQCEntry,
+      addESGEntry,
+      addRecipe,
+      gradePiece,
+      resetDB,
+    }),
+    [
+      db,
+      addOrder,
+      updateOrderStatus,
+      addBatch,
+      advanceBatchStage,
+      addStockMove,
+      addChemicalLot,
+      addRawSkinLot,
+      addQCEntry,
+      addESGEntry,
+      addRecipe,
+      gradePiece,
+      resetDB,
+    ],
+  );
 
   return <StoreContext.Provider value={ctx}>{children}</StoreContext.Provider>;
 }

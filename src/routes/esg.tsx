@@ -214,8 +214,8 @@ function ESGPage() {
                 </td>
               </tr>
             ) : (
-              [...esgEntries].reverse().map((e, i) => (
-                <tr key={i} className="border-t border-border hover:bg-muted/30">
+              [...esgEntries].reverse().map((e) => (
+                <tr key={e.date} className="border-t border-border hover:bg-muted/30">
                   <td className="px-4 py-2 text-xs">{e.date}</td>
                   <td className="px-4 py-2 text-right">{e.water_m3}</td>
                   <td className="px-4 py-2 text-right">{e.chrome_kg}</td>

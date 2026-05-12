@@ -151,13 +151,16 @@ function QCPage() {
                 </td>
               </tr>
             ) : (
-              qcEntries.map((q, i) => {
+              qcEntries.map((q) => {
                 const a = (q.grade_a / q.inspected) * 100;
                 const b = (q.grade_b / q.inspected) * 100;
                 const c = (q.grade_c / q.inspected) * 100;
                 const rej = (q.rejects / q.inspected) * 100;
                 return (
-                  <tr key={i} className="border-t border-border hover:bg-muted/30">
+                  <tr
+                    key={`${q.batch_no}-${q.date}`}
+                    className="border-t border-border hover:bg-muted/30"
+                  >
                     <td className="px-4 py-2.5 font-mono text-xs">{q.batch_no}</td>
                     <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">
                       {q.article}

@@ -16,11 +16,9 @@ function BatchesPage() {
 
   const advance = (id: string, batchNo: string) => {
     const newStage = advanceBatchStage(id);
-    if (newStage) {
-      toast.success(`${batchNo} → ${newStage.replace("_", " ").toUpperCase()}`, {
-        description: "Stage advanced",
-      });
-    }
+    toast.success(`${batchNo} → ${newStage.replace(/_/g, " ").toUpperCase()}`, {
+      description: newStage === "done" ? "Batch complete" : "Stage advanced",
+    });
   };
 
   return (

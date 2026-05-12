@@ -1,3 +1,4 @@
+import { useMemo, useCallback } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -79,43 +80,69 @@ function Dashboard() {
   const navigate = useNavigate({ from: "/" });
   const { orders, batches, esgEntries, qcEntries } = useStore();
 
-  const days = RANGES.find((r) => r.value === range)?.days ?? 10;
-  const esgData = esgEntries.slice(-days);
+  const days = useMemo(() => RANGES.find((r) => r.value === range)?.days ?? 10, [range]);
+  const esgData = useMemo(() => esgEntries.slice(-days), [esgEntries, days]);
 
-  const filteredBatches = batches.filter(
-    (b) => (species === "all" || b.species === species) && (exit === "all" || b.exit === exit),
+  const filteredBatches = useMemo(
+    () =>
+      batches.filter(
+        (b) => (species === "all" || b.species === species) && (exit === "all" || b.exit === exit),
+      ),
+    [batches, species, exit],
   );
-  const recentBatches = filteredBatches.slice(0, 6);
+  const recentBatches = useMemo(() => filteredBatches.slice(0, 6), [filteredBatches]);
 
-  const filteredOrders = orders.filter((o) => {
-    if (species === "all") return true;
-    return species === "cow" ? o.article.startsWith("COW") : o.article.startsWith("GOAT");
-  });
-  const urgentOrders = filteredOrders
-    .filter((o) => o.status === "in_production" || o.status === "confirmed")
-    .slice(0, 4);
-
-  const set = (
-    patch: Partial<{ range: typeof range; species: typeof species; exit: typeof exit }>,
-  ) =>
-    navigate({
-      search: (prev: { range: typeof range; species: typeof species; exit: typeof exit }) => ({
-        ...prev,
-        ...patch,
+  const filteredOrders = useMemo(
+    () =>
+      orders.filter((o) => {
+        if (species === "all") return true;
+        return species === "cow" ? o.article.startsWith("COW") : o.article.startsWith("GOAT");
       }),
-    });
+    [orders, species],
+  );
+  const urgentOrders = useMemo(
+    () =>
+      filteredOrders
+        .filter((o) => o.status === "in_production" || o.status === "confirmed")
+        .slice(0, 4),
+    [filteredOrders],
+  );
+
+  const set = useCallback(
+    (patch: Partial<{ range: typeof range; species: typeof species; exit: typeof exit }>) =>
+      navigate({
+        search: (prev: { range: typeof range; species: typeof species; exit: typeof exit }) => ({
+          ...prev,
+          ...patch,
+        }),
+      }),
+    [navigate],
+  );
 
   // Live KPIs
-  const activeOrders = orders.filter(
-    (o) => o.status === "in_production" || o.status === "confirmed",
-  ).length;
-  const activeBatches = filteredBatches.filter((b) => b.status !== "done").length;
-  const piecesInWip = batches.filter((b) => b.status !== "done").reduce((s, b) => s + b.pieces, 0);
-  const lastESG = esgEntries.length > 0 ? esgEntries[esgEntries.length - 1] : null;
-  const avgQCYield =
-    qcEntries.length > 0
-      ? qcEntries.slice(-4).reduce((s, q) => s + q.yield_pct, 0) / Math.min(4, qcEntries.length)
-      : 97.5;
+  const activeOrders = useMemo(
+    () => orders.filter((o) => o.status === "in_production" || o.status === "confirmed").length,
+    [orders],
+  );
+  const activeBatches = useMemo(
+    () => filteredBatches.filter((b) => b.status !== "done").length,
+    [filteredBatches],
+  );
+  const piecesInWip = useMemo(
+    () => batches.filter((b) => b.status !== "done").reduce((s, b) => s + b.pieces, 0),
+    [batches],
+  );
+  const lastESG = useMemo(
+    () => (esgEntries.length > 0 ? esgEntries[esgEntries.length - 1] : null),
+    [esgEntries],
+  );
+  const avgQCYield = useMemo(
+    () =>
+      qcEntries.length > 0
+        ? qcEntries.slice(-4).reduce((s, q) => s + q.yield_pct, 0) / Math.min(4, qcEntries.length)
+        : 97.5,
+    [qcEntries],
+  );
 
   return (
     <PageShell

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, StatCard } from "@/components/page-shell";
 import { fmtBDT, fmtNum, type StockMove } from "@/lib/mock-data";
@@ -67,16 +67,16 @@ function InventoryPage() {
   const [tab, setTab] = useState<Tab>("skins");
 
   // ── Auto lot number generators ───────────────────────────────────
-  const genRawLotNo = () => {
+  const genRawLotNo = useCallback(() => {
     const d = new Date();
     const ym = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}`;
     return `RAW-${ym}-${String(rawSkins.length + 1).padStart(3, "0")}`;
-  };
-  const genChemLotNo = () => {
+  }, [rawSkins.length]);
+  const genChemLotNo = useCallback(() => {
     const d = new Date();
     const ym = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}`;
     return `CH-${ym}-${String(chemicals.length + 1).padStart(3, "0")}`;
-  };
+  }, [chemicals.length]);
 
   // ── Raw skins tab state ──────────────────────────────────────────
   const [skinSearch, setSkinSearch] = useState("");
@@ -179,29 +179,52 @@ function InventoryPage() {
   const [moveFilter, setMoveFilter] = useState<StockMove["type"] | "all">("all");
 
   // ── Computed values ───────────────────────────────────────────────
-  const totalRawPcs = rawSkins.reduce((s, r) => s + r.pieces, 0);
-  const totalRawValue = rawSkins.reduce((s, r) => s + r.unit_cost_bdt * r.pieces, 0);
-  const reorderCount = chemicals.filter((c) => c.qty_kg < c.reorder_kg).length;
-  const totalChemValue = chemicals.reduce((s, c) => s + c.qty_kg * c.unit_cost_bdt, 0);
+  const totalRawPcs = useMemo(() => rawSkins.reduce((s, r) => s + r.pieces, 0), [rawSkins]);
+  const totalRawValue = useMemo(
+    () => rawSkins.reduce((s, r) => s + r.unit_cost_bdt * r.pieces, 0),
+    [rawSkins],
+  );
+  const reorderCount = useMemo(
+    () => chemicals.filter((c) => c.qty_kg < c.reorder_kg).length,
+    [chemicals],
+  );
+  const totalChemValue = useMemo(
+    () => chemicals.reduce((s, c) => s + c.qty_kg * c.unit_cost_bdt, 0),
+    [chemicals],
+  );
   const lastMove = stockMoves[0];
 
   // Filtered data
-  const visibleSkins = skinSearch.trim()
-    ? rawSkins.filter(
-        (r) =>
-          r.lot_no.toLowerCase().includes(skinSearch.toLowerCase()) ||
-          r.origin.toLowerCase().includes(skinSearch.toLowerCase()),
-      )
-    : rawSkins;
+  const visibleSkins = useMemo(
+    () =>
+      skinSearch.trim()
+        ? rawSkins.filter(
+            (r) =>
+              r.lot_no.toLowerCase().includes(skinSearch.toLowerCase()) ||
+              r.origin.toLowerCase().includes(skinSearch.toLowerCase()),
+          )
+        : rawSkins,
+    [rawSkins, skinSearch],
+  );
 
-  const visibleChems =
-    chemFilter === "all" ? chemicals : chemicals.filter((c) => c.type === chemFilter);
+  const visibleChems = useMemo(
+    () => (chemFilter === "all" ? chemicals : chemicals.filter((c) => c.type === chemFilter)),
+    [chemicals, chemFilter],
+  );
 
-  const visibleMoves = (
-    moveFilter === "all" ? stockMoves : stockMoves.filter((m) => m.type === moveFilter)
-  ).slice(0, 100);
+  const visibleMoves = useMemo(
+    () =>
+      (moveFilter === "all" ? stockMoves : stockMoves.filter((m) => m.type === moveFilter)).slice(
+        0,
+        100,
+      ),
+    [stockMoves, moveFilter],
+  );
 
-  const moveCountByType = (t: StockMove["type"]) => stockMoves.filter((m) => m.type === t).length;
+  const moveCountByType = useCallback(
+    (t: StockMove["type"]) => stockMoves.filter((m) => m.type === t).length,
+    [stockMoves],
+  );
 
   return (
     <PageShell title="Inventory" subtitle="Raw skins · chemicals · stock ledger">
