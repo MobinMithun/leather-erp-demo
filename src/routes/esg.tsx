@@ -159,6 +159,7 @@ function ESGPage() {
                   strokeWidth={2}
                   dot={false}
                   name="Water m³"
+                  isAnimationActive={false}
                 />
                 <Line
                   type="monotone"
@@ -167,6 +168,7 @@ function ESGPage() {
                   strokeWidth={2}
                   dot={false}
                   name="Chrome kg"
+                  isAnimationActive={false}
                 />
                 <Line
                   type="monotone"
@@ -175,6 +177,7 @@ function ESGPage() {
                   strokeWidth={2}
                   dot={false}
                   name="Sulphide kg"
+                  isAnimationActive={false}
                 />
                 <Line
                   type="monotone"
@@ -183,6 +186,7 @@ function ESGPage() {
                   strokeWidth={2}
                   dot={false}
                   name="Solid waste kg"
+                  isAnimationActive={false}
                 />
               </LineChart>
             </ResponsiveContainer>

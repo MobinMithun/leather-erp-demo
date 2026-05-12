@@ -58,6 +58,7 @@ function FilterPills<T extends string>({
     <div className="inline-flex border border-border bg-card">
       {options.map((o) => (
         <button
+          type="button"
           key={o.value}
           onClick={() => onChange(o.value)}
           className={`px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider border-r border-border last:border-r-0 ${
@@ -221,6 +222,7 @@ function Dashboard() {
                     stroke="oklch(0.55 0.15 250)"
                     fill="url(#g1)"
                     strokeWidth={2}
+                    isAnimationActive={false}
                   />
                   <Area
                     type="monotone"
@@ -228,6 +230,7 @@ function Dashboard() {
                     stroke="oklch(0.72 0.16 55)"
                     fill="url(#g2)"
                     strokeWidth={2}
+                    isAnimationActive={false}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -275,7 +278,12 @@ function Dashboard() {
                   }}
                   cursor={{ fill: "oklch(0.95 0.004 250)" }}
                 />
-                <Bar dataKey="pieces" fill="oklch(0.28 0.02 250)" radius={[2, 2, 0, 0]} />
+                <Bar
+                  dataKey="pieces"
+                  fill="oklch(0.28 0.02 250)"
+                  radius={[2, 2, 0, 0]}
+                  isAnimationActive={false}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>

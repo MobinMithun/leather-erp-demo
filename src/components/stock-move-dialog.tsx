@@ -102,6 +102,32 @@ export function StockMoveDialog() {
     .filter((b) => b.status !== "done")
     .slice(0, 6)
     .map((b) => b.batch_no);
+  const destinationValue = destination === "__custom__" ? customDest.trim() : destination;
+  const qtyNumber = Number(qty);
+  const inQtyNumber = Number(inQty);
+  const adjustDeltaNumber = Number(adjustDelta);
+  const hasMoveQty = Number.isFinite(qtyNumber) && qtyNumber > 0;
+  const hasInQty = Number.isFinite(inQtyNumber) && inQtyNumber > 0;
+  const hasValidAdjust =
+    selected &&
+    Number.isFinite(adjustDeltaNumber) &&
+    adjustDeltaNumber !== 0 &&
+    selected.available + adjustDeltaNumber >= 0;
+  const canPostMove =
+    moveType === "IN"
+      ? Boolean(inItem.trim() && inLot.trim() && hasInQty && inFrom.trim() && inTo.trim())
+      : Boolean(
+          selected &&
+          ((moveType === "OUT" &&
+            hasMoveQty &&
+            qtyNumber <= selected.available &&
+            destinationValue) ||
+            (moveType === "TRANSFER" &&
+              hasMoveQty &&
+              qtyNumber <= selected.available &&
+              destinationValue) ||
+            (moveType === "ADJUST" && hasValidAdjust)),
+        );
 
   const selectItem = (item: SelectedItem) => {
     setSelected(item);
@@ -122,8 +148,7 @@ export function StockMoveDialog() {
       toast.error(`Only ${fmtNum(selected.available)} ${selected.unit} available`);
       return;
     }
-    const dest = destination === "__custom__" ? customDest.trim() : destination;
-    if (!dest) {
+    if (!destinationValue) {
       toast.error("Select or enter a destination");
       return;
     }
@@ -135,10 +160,12 @@ export function StockMoveDialog() {
       qty: -qtyNum,
       unit: selected.unit,
       from: selected.location,
-      to: dest,
-      ref: ref.trim() || dest,
+      to: destinationValue,
+      ref: ref.trim() || destinationValue,
     });
-    toast.success(`OUT · ${selected.name} · ${fmtNum(qtyNum)} ${selected.unit} → ${dest}`);
+    toast.success(
+      `OUT · ${selected.name} · ${fmtNum(qtyNum)} ${selected.unit} → ${destinationValue}`,
+    );
     reset();
     setOpen(false);
   };
@@ -153,9 +180,12 @@ export function StockMoveDialog() {
       toast.error("Enter a valid quantity");
       return;
     }
-    const dest = destination === "__custom__" ? customDest.trim() : destination;
-    if (!dest) {
-      toast.error("Enter a destination");
+    if (qtyNum > selected.available) {
+      toast.error(`Only ${fmtNum(selected.available)} ${selected.unit} available`);
+      return;
+    }
+    if (!destinationValue) {
+      toast.error("Select or enter a destination");
       return;
     }
     addStockMove({
@@ -166,10 +196,10 @@ export function StockMoveDialog() {
       qty: qtyNum,
       unit: selected.unit,
       from: selected.location,
-      to: dest,
+      to: destinationValue,
       ref: ref.trim() || "TRANSFER",
     });
-    toast.success(`TRANSFER · ${selected.name} → ${dest}`);
+    toast.success(`TRANSFER · ${selected.name} → ${destinationValue}`);
     reset();
     setOpen(false);
   };
@@ -182,6 +212,10 @@ export function StockMoveDialog() {
     const delta = Number(adjustDelta);
     if (!Number.isFinite(delta) || delta === 0) {
       toast.error("Enter a non-zero delta");
+      return;
+    }
+    if (selected.available + delta < 0) {
+      toast.error(`Adjustment cannot drop below zero ${selected.unit}`);
       return;
     }
     addStockMove({
@@ -258,6 +292,7 @@ export function StockMoveDialog() {
           <div className="flex gap-2">
             {MOVE_TYPES.map((t) => (
               <button
+                type="button"
                 key={t}
                 onClick={() => {
                   setMoveType(t);
@@ -330,6 +365,7 @@ export function StockMoveDialog() {
                   <div className="flex gap-1">
                     {(["kg", "pcs", "sqft"] as const).map((u) => (
                       <button
+                        type="button"
                         key={u}
                         onClick={() => setInUnit(u)}
                         className={`flex-1 border py-1.5 text-xs uppercase ${inUnit === u ? "border-accent bg-accent/10 text-accent-foreground" : "border-border text-muted-foreground hover:bg-muted"}`}
@@ -390,6 +426,7 @@ export function StockMoveDialog() {
                     ) : (
                       filteredItems.map((item) => (
                         <button
+                          type="button"
                           key={item.id}
                           onClick={() => selectItem(item)}
                           className="w-full flex items-center justify-between px-3 py-2.5 text-left hover:bg-muted/50 transition-colors"
@@ -430,6 +467,7 @@ export function StockMoveDialog() {
                       <div className="text-[10px] text-muted-foreground">available</div>
                     </div>
                     <button
+                      type="button"
                       onClick={() => setSelected(null)}
                       className="text-[10px] text-muted-foreground underline hover:text-foreground"
                     >
@@ -467,6 +505,7 @@ export function StockMoveDialog() {
                     <div className="flex flex-wrap gap-1.5">
                       {[...DRUMS, "Dispatch", "Waste", "Other…"].map((d) => (
                         <button
+                          type="button"
                           key={d}
                           onClick={() => setDestination(d === "Other…" ? "__custom__" : d)}
                           className={`border px-2.5 py-1 text-xs font-medium transition-colors ${
@@ -498,6 +537,7 @@ export function StockMoveDialog() {
                     <div className="flex flex-wrap gap-1.5">
                       {recentBatchRefs.map((b) => (
                         <button
+                          type="button"
                           key={b}
                           onClick={() => setRef(b)}
                           className={`border px-2 py-0.5 text-[10px] font-mono transition-colors ${
@@ -652,16 +692,7 @@ export function StockMoveDialog() {
           >
             Cancel
           </Button>
-          <Button
-            size="sm"
-            onClick={handleSubmit}
-            disabled={
-              (moveType !== "IN" && !selected) ||
-              (moveType === "OUT" && (!qty || !destination)) ||
-              (moveType === "TRANSFER" && (!qty || !customDest)) ||
-              (moveType === "ADJUST" && !adjustDelta)
-            }
-          >
+          <Button size="sm" onClick={handleSubmit} disabled={!canPostMove}>
             Post move <ChevronRight className="h-3.5 w-3.5 ml-1" />
           </Button>
         </DialogFooter>

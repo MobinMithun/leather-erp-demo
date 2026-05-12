@@ -80,7 +80,7 @@ export function AppSidebar() {
                 {s.items.map((item) => (
                   <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                      <Link to={item.url}>
+                      <Link to={item.url} preload="render">
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
                       </Link>
